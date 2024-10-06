@@ -17,7 +17,6 @@ enum Role {
   USER
   TELECONSULTER
   HEALTHCARE_FACILITY
-  PHARMACY
   ADMIN
 }
 
@@ -45,23 +44,8 @@ model User {
   healthcareFacilityId Int?                @unique
 
   teleconsultor Teleconsultor? 
-
-  Pharmacy Pharmacy[]
 }
 
-
-model Pharmacy {
-  id           Int      @id @default(autoincrement())
-  name         String
-  location     String
-  contact      String
-  status       Status   @default(PENDING) // Approved or pending approval
-  userId       Int      @unique
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-
-  user User @relation(fields: [userId], references: [id])
-}
 
 model Teleconsultor {
   id           Int      @id @default(autoincrement())
