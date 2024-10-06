@@ -40,41 +40,41 @@ async function handler(req, res) {
     }
 
     // Step 2: Find teleconsultor's ID by matching the doctor's name
-const teleconsultorUser = await prisma.user.findFirst({
-  where: {
-    role: 'TELECONSULTER', // Ensure we're matching the Teleconsultor role
-    firstName: teleconsultation.doctor.split(" ")[0], // Match first name from 'doctor' field
-    lastName: teleconsultation.doctor.split(" ")[1], // Match last name from 'doctor' field
-  },
-});
+    const teleconsultorUser = await prisma.user.findFirst({
+      where: {
+        role: 'TELECONSULTER', // Ensure we're matching the Teleconsultor role
+        firstName: teleconsultation.doctor.split(" ")[0], // Match first name from 'doctor' field
+        lastName: teleconsultation.doctor.split(" ")[1], // Match last name from 'doctor' field
+      },
+    });
 
-if (!teleconsultorUser) {
-  console.log("Teleconsultor not found."); // Log not found error
-  return res.status(404).json({ error: 'Teleconsultor not found.' });
-}
+    if (!teleconsultorUser) {
+      console.log("Teleconsultor not found."); // Log not found error
+      return res.status(404).json({ error: 'Teleconsultor not found.' });
+    }
 
-// Step 3: Fetch teleconsultor details from Teleconsultor model using userId
-const teleconsultor = await prisma.teleconsultor.findUnique({
-  where: {
-    userId: teleconsultorUser.id, // Match teleconsultor using the userId from User table
-  },
-});
+    // Step 3: Fetch teleconsultor details from Teleconsultor model using userId
+    const teleconsultor = await prisma.teleconsultor.findUnique({
+      where: {
+        userId: teleconsultorUser.id, // Match teleconsultor using the userId from User table
+      },
+    });
 
-console.log("Teleconsultor found:", teleconsultor); // Log the teleconsultor data
+    console.log("Teleconsultor found:", teleconsultor); // Log the teleconsultor data
 
-if (!teleconsultor) {
-  console.log("Teleconsultor details not found."); // Log not found error
-  return res.status(404).json({ error: 'Teleconsultor details not found.' });
-}
+    if (!teleconsultor) {
+      console.log("Teleconsultor details not found."); // Log not found error
+      return res.status(404).json({ error: 'Teleconsultor details not found.' });
+    }
 
-const teleconsultorRate = teleconsultor.rate;
-const userAmount = teleconsultorRate; // The amount the user will pay (teleconsultor's rate)
-const teleconsultorAmount = teleconsultorRate * 0.8; // Teleconsultor gets 80%
+    const teleconsultorRate = teleconsultor.rate;
+    const userAmount = teleconsultorRate; // The amount the user will pay (teleconsultor's rate)
+    const teleconsultorAmount = teleconsultorRate * 0.8; // Teleconsultor gets 80%
+    const adminAmount = teleconsultorRate * 0.2; // Admin gets 20%
 
-console.log("Calculated amounts - User Amount:", userAmount, "Teleconsultor Amount:", teleconsultorAmount);
+    console.log("Calculated amounts - User Amount:", userAmount, "Teleconsultor Amount:", teleconsultorAmount, "Admin Amount:", adminAmount);
 
-
-    // Step 3: Update teleconsultation status to Approved
+    // Step 4: Update teleconsultation status to Approved
     await prisma.teleconsultation.update({
       where: { id: parseInt(teleconsultationId) },
       data: { status: 'Approved' },
@@ -82,26 +82,28 @@ console.log("Calculated amounts - User Amount:", userAmount, "Teleconsultor Amou
 
     console.log("Teleconsultation status updated to Approved.");
 
-    // Step 4: Create a unique transaction reference
-    const txRef = `TX-${Date.now()}-${teleconsultationId}`;
-    console.log("Transaction reference generated:", txRef);
+    // Step 5: Create unique transaction references
+    const userTxRef = `TX-USER-${Date.now()}-${teleconsultationId}`;
+    const teleconsultorTxRef = `TX-TELECONSULTOR-${Date.now()}-${teleconsultationId}`;
+    const adminTxRef = `TX-ADMIN-${Date.now()}-${teleconsultationId}`;
+    console.log("Transaction references generated:", { userTxRef, teleconsultorTxRef, adminTxRef });
 
-    // Step 5: Generate PDF receipt
-    const receiptFilePath = path.join(__dirname, `../../public/receipts/receipt-${txRef}.pdf`);
+    // Step 6: Generate PDF receipt
+    const receiptFilePath = path.join(__dirname, `../../public/receipts/receipt-${userTxRef}.pdf`);
     generateReceiptPDF({
-      txRef,
+      txRef: userTxRef,
       amount: userAmount,
       teleconsultation,
       receiptFilePath,
     });
     console.log("PDF receipt generated at:", receiptFilePath);
 
-    // Step 6: Create a transaction for the user
+    // Step 7: Create a transaction for the user
     const userTransaction = await prisma.transaction.create({
       data: {
         userId: teleconsultation.userId,
         teleconsultationId: teleconsultation.id,
-        txRef,
+        txRef: userTxRef,
         status: 'Completed',
         amount: userAmount, // Amount for the user transaction
         createdAt: new Date(),
@@ -111,12 +113,12 @@ console.log("Calculated amounts - User Amount:", userAmount, "Teleconsultor Amou
 
     console.log("User transaction created:", userTransaction); // Log the created transaction
 
-    // Step 7: Create a transaction for the teleconsultor
+    // Step 8: Create a transaction for the teleconsultor
     const teleconsultorTransaction = await prisma.transaction.create({
       data: {
         userId: teleconsultor.userId, // Teleconsultor's user ID
         teleconsultationId: teleconsultation.id,
-        txRef,
+        txRef: teleconsultorTxRef,
         status: 'Completed',
         amount: teleconsultorAmount, // 80% of the rate goes to the teleconsultor
         createdAt: new Date(),
@@ -126,9 +128,28 @@ console.log("Calculated amounts - User Amount:", userAmount, "Teleconsultor Amou
 
     console.log("Teleconsultor transaction created:", teleconsultorTransaction); // Log the created transaction
 
-    // Step 8: Notify the user and teleconsultor via email
-    const receiptUrl = `${process.env.BASE_URL}/receipts/receipt-${txRef}.pdf`;
-    
+    // Step 9: Create a transaction for the admin (deduction)
+    const adminUser = await prisma.user.findFirst({
+      where: { role: 'ADMIN' }, // Assuming there is an admin in the system
+    });
+
+    const adminTransaction = await prisma.transaction.create({
+      data: {
+        userId: adminUser.id, // Admin's user ID
+        teleconsultationId: teleconsultation.id,
+        txRef: adminTxRef,
+        status: 'Completed',
+        amount: adminAmount, // Admin receives 20%
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+    });
+
+    console.log("Admin transaction created:", adminTransaction); // Log the created transaction
+
+    // Step 10: Notify the user and teleconsultor via email
+    const receiptUrl = `${process.env.BASE_URL}/receipts/receipt-${userTxRef}.pdf`;
+
     // Sending email to user
     await sendEmailWithReceipt({
       to: teleconsultation.user.email,
@@ -140,14 +161,14 @@ console.log("Calculated amounts - User Amount:", userAmount, "Teleconsultor Amou
 
     // Sending email to teleconsultor
     await sendEmailWithReceipt({
-      to: teleconsultor.user.email,
+      to: teleconsultorUser.email,
       subject: `Teleconsultation Receipt for Dr. ${teleconsultation.doctor}`,
       text: `You have successfully completed a teleconsultation with ${teleconsultation.user.firstName} ${teleconsultation.user.lastName}. You can access your receipt here: ${receiptUrl}`,
       receiptFilePath,
     });
-    console.log("Email sent to teleconsultor:", teleconsultor.user.email);
+    console.log("Email sent to teleconsultor:", teleconsultorUser.email);
 
-    return res.status(200).json({ success: true, message: 'Teleconsultation approved, transaction created, receipt generated, and emails sent.' });
+    return res.status(200).json({ success: true, message: 'Teleconsultation approved, transactions created, receipt generated, and emails sent.' });
   } catch (error) {
     console.error('Error updating teleconsultation status or creating transactions:', error); // Log any errors
     return res.status(500).json({ error: 'Failed to process teleconsultation approval and transactions.' });
