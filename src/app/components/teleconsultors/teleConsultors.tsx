@@ -6,12 +6,12 @@ import 'react-loading-skeleton/dist/skeleton.css'; // Import the skeleton CSS
 import { AiFillStar, AiOutlineStar } from "react-icons/ai"; // Importing star icons
 
 interface Teleconsultor {
-  id: number;
   firstName: string;
   lastName: string;
   teleconsultor: {
     rate: number;
     rating: number;
+    id: number;
   };
 }
 
@@ -26,6 +26,7 @@ const TeleconsultorsList = () => {
       try {
         const res = await fetch('/api/teleconsultors');
         const data = await res.json();
+        console.log(data);
         if (data.success) {
           setTeleconsultors(data.teleconsultors);
         } else {
@@ -89,7 +90,7 @@ const TeleconsultorsList = () => {
             ))
         ) : (
           teleconsultors.map((teleconsultor) => (
-            <div key={teleconsultor.id} className="p-6 bg-white dark:bg-gray-800 shadow-sm rounded-md transition transform hover:scale-105 duration-200 hover:shadow-xl cursor-pointer">
+            <div key={teleconsultor.teleconsultor.id} className="p-6 bg-white dark:bg-gray-800 shadow-sm rounded-md transition transform hover:scale-105 duration-200 hover:shadow-xl cursor-pointer">
               <h2 className="text-xl font-bold">
                 Dr. {teleconsultor.firstName} {teleconsultor.lastName}
               </h2>
@@ -100,7 +101,7 @@ const TeleconsultorsList = () => {
               </div>
               <button
                 className="mt-4 bg-blue-600 text-white py-2 px-4 rounded"
-                onClick={() => handleBookNow(teleconsultor.id)} // Pass teleconsultorId
+                onClick={() => handleBookNow(teleconsultor.teleconsultor.id)} // Pass teleconsultorId
               >
                 Book Now
               </button>

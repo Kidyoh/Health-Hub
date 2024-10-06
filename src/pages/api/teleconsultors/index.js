@@ -12,11 +12,11 @@ async function handler(req, res) {
           status: 'APPROVED',
         },
         select: {
-          id: true,
           firstName: true,
           lastName: true,
           teleconsultor: {
             select: {
+              id: true,
               rate: true,
               rating: true,
             },

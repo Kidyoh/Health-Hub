@@ -14,14 +14,12 @@ async function handler(req, res) {
   if (!gateway || !teleconsultorId || !date) return res.status(400).json({ error: 'Missing required fields' });
 
   try {
-    // Fetch the teleconsultor and their rate from the Teleconsultor table
     const teleconsultor = await prisma.teleconsultor.findUnique({
-      where: { id: parseInt(teleconsultorId, 10) }, // Use the correct field to find the teleconsultor
-      include: { user: true }, // Include the related user data
+      where: { id: parseInt(teleconsultorId, 10) },
+      include: { user: true },
     });
     if (!teleconsultor) return res.status(404).json({ error: 'Teleconsultor not found' });
 
-    // Create a teleconsultation entry
     const teleconsultation = await prisma.teleconsultation.create({
       data: {
         userId: session.id,
@@ -31,20 +29,18 @@ async function handler(req, res) {
       },
     });
 
-    // Create an appointment associated with the teleconsultation
     const appointment = await prisma.appointment.create({
       data: {
         date: new Date(date),
         userId: session.id,
         teleconsultationId: teleconsultation.id,
-        facilityId: facilityId ? parseInt(facilityId, 10) : null, // If facilityId is provided
+        facilityId: facilityId ? parseInt(facilityId, 10) : null,
         status: 'Pending',
       },
     });
 
     let paymentUrl;
 
-    // Payment gateway handling
     if (gateway === 'stripe') {
       const stripeSession = await stripe.checkout.sessions.create({
         payment_method_types: ['card'],

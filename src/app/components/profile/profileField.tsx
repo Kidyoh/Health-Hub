@@ -1,31 +1,23 @@
 import { Button } from "flowbite-react";
+import { AiOutlineEdit } from "react-icons/ai"; // For the edit icon
 
 interface ProfileFieldProps {
     label: string;
-    value: string | number;
-    editable: boolean;
+    value: string | number | undefined;
     onEdit: () => void;
-    onSave: () => void;
-    onChange: (value: string) => void;
   }
   
-  const ProfileField: React.FC<ProfileFieldProps> = ({ label, value, editable, onEdit, onSave, onChange }) => {
-    return (
-      <div className="flex items-center space-x-4">
-        <label className="font-semibold w-1/4">{label}:</label>
-        {editable ? (
-          <input
-            type="text"
-            className="border border-gray-300 rounded p-2 w-3/4"
-            value={value}
-            onChange={(e) => onChange(e.target.value)}
-          />
-        ) : (
-          <p className="w-3/4">{value}</p>
-        )}
-        <Button onClick={editable ? onSave : onEdit}>{editable ? "Save" : "Edit"}</Button>
+  const ProfileField: React.FC<ProfileFieldProps> = ({ label, value, onEdit }) => (
+    <div className="flex justify-between items-center border-b pb-3 mb-4">
+      <div>
+        <h3 className="text-lg font-medium">{label}</h3>
+        <p className="text-gray-600">{value || "N/A"}</p>
       </div>
-    );
-  };
+      <Button onClick={onEdit} className="flex items-center gap-1 text-blue-500">
+        <AiOutlineEdit />
+        Edit
+      </Button>
+    </div>
+  );
 
 export default ProfileField;
