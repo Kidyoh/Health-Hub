@@ -52,27 +52,27 @@ const SidebarContent = {
         },
         {
           name: "Teleconsultations",
-          icon: "solar:call-outline",
+          icon: "carbon:ibm-telehealth",
           id: uniqueId(),
           url: "/user/teleconsultations",
         },
         {
           name: "Health Tips",
-          icon: "solar:health-square-outline",
+          icon: "solar:health-outline",
           id: uniqueId(),
           url: "/user/health-tips",
         },
         {
           name: "My Prescriptions",
-          icon: "solar:prescription-outline",
+          icon: "healthicons:medicines-outline",
           id: uniqueId(),
           url: "/user/prescriptions",
         },
         {
-          name: "Medical Records",
-          icon: "solar:file-text-outline",
+          name: "Symptopms Checker",
+          icon: "healthicons:symptom-outline",
           id: uniqueId(),
-          url: "/user/medical-records",
+          url: "/user/symptoms-checker",
         },
         {
           name: "Profile Settings",

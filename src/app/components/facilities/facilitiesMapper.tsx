@@ -5,7 +5,7 @@ import 'leaflet/dist/leaflet.css';
 
 // Custom Marker Icon (example)
 const customIcon = new L.Icon({
-  iconUrl: '/path-to-custom-icon.png', // Provide the path to your custom icon
+  iconUrl: '/images/markers/hospital-marker.svg', // Provide the path to your custom icon
   iconSize: [32, 32], // Size of the icon
   iconAnchor: [16, 32], // Point of the icon which will correspond to marker's location
   popupAnchor: [0, -32], // Point from which the popup should open relative to the iconAnchor
