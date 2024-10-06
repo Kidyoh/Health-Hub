@@ -23,7 +23,7 @@ async function handler(req, res) {
 
     // AI safety settings
     const model = genAI.getGenerativeModel({
-      model: 'gemini-pro-vision',
+      model: 'gemini-1.5-flash',
       safetySettings: [
         {
           category: HarmCategory.HARM_CATEGORY_HARASSMENT,

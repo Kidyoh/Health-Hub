@@ -1,5 +1,6 @@
 "use client"
 import React, { useState, useEffect } from 'react';
+import StyledAIResponse from '@/app/components/symptom-checker/styledAi'; // Adjust the import path as needed
 
 interface ChatMessage {
   sender: 'user' | 'ai';
@@ -23,8 +24,16 @@ const SymptomChecker: React.FC = () => {
     const fetchUserId = async () => {
       try {
         const response = await fetch('/api/user');
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
         const data = await response.json();
-        setUserId(data.userId);
+        console.log('Fetched userId:', data.userId); // Add this log
+        if (data.userId) {
+          setUserId(data.userId);
+        } else {
+          console.error('userId is undefined in the response:', data);
+        }
       } catch (error) {
         console.error("Failed to fetch user session info:", error);
       }
@@ -51,7 +60,13 @@ const SymptomChecker: React.FC = () => {
   }, [userId]);
 
   const handleSendMessage = async () => {
-    if (!symptoms || !userId) return;
+    console.log('handleSendMessage called');
+    console.log('Current symptoms:', symptoms); // Add this log
+    console.log('Current userId:', userId); // Add this log
+    if (!symptoms || !userId) {
+      console.log('Missing symptoms or userId');
+      return;
+    }
   
     setChatHistory((prev) => [...prev, { sender: 'user', text: symptoms }]);
     setLoading(true);
@@ -70,6 +85,7 @@ const SymptomChecker: React.FC = () => {
       });
   
       const data = await response.json();
+      console.log('API response:', data);
   
       if (response.ok) {
         setChatHistory((prev) => [
@@ -80,8 +96,11 @@ const SymptomChecker: React.FC = () => {
           // If it's a new session, save the session ID
           setCurrentSessionId(data.savedDiagnosis.chatSessionId);
         }
+      } else {
+        console.error('API error:', data);
       }
     } catch (error) {
+      console.error('Fetch error:', error);
       setChatHistory((prev) => [
         ...prev,
         { sender: 'ai', text: 'An error occurred. Please try again.' },
@@ -133,9 +152,13 @@ const SymptomChecker: React.FC = () => {
         <div className="bg-gray-100 p-4 rounded-lg mb-4 max-h-96 overflow-y-auto">
           {chatHistory.map((message, index) => (
             <div key={index} className={`mb-2 ${message.sender === 'user' ? 'text-right' : 'text-left'}`}>
-              <p className={`inline-block p-2 rounded-lg ${message.sender === 'user' ? 'bg-blue-500 text-white' : 'bg-gray-300 text-black'}`}>
-                {message.text}
-              </p>
+              {message.sender === 'user' ? (
+                <p className="inline-block p-2 rounded-lg bg-blue-500 text-white">
+                  {message.text}
+                </p>
+              ) : (
+                <StyledAIResponse text={message.text} />
+              )}
             </div>
           ))}
         </div>

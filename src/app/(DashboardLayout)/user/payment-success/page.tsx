@@ -49,7 +49,7 @@ const PaymentSuccess = () => {
       <div className="text-center mt-6">
         <button
           className="bg-blue-600 text-white py-2 px-4 rounded"
-          onClick={() => router.push('/teleconsultations')}
+          onClick={() => router.push('/user/teleconsultations')}
         >
           Go to Teleconsultations
         </button>

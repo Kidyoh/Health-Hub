@@ -8,11 +8,11 @@ import { AiFillStar, AiOutlineStar } from "react-icons/ai"; // Importing star ic
 interface Teleconsultor {
   firstName: string;
   lastName: string;
-  teleconsultor: {
+  Teleconsultor: {
+    id: number;
     rate: number;
     rating: number;
-    id: number;
-  };
+  }[]; // Array of Teleconsultor
 }
 
 const TeleconsultorsList = () => {
@@ -90,21 +90,28 @@ const TeleconsultorsList = () => {
             ))
         ) : (
           teleconsultors.map((teleconsultor) => (
-            <div key={teleconsultor.teleconsultor.id} className="p-6 bg-white dark:bg-gray-800 shadow-sm rounded-md transition transform hover:scale-105 duration-200 hover:shadow-xl cursor-pointer">
+            <div key={teleconsultor.Teleconsultor[0]?.id} className="p-6 bg-white dark:bg-gray-800 shadow-sm rounded-md transition transform hover:scale-105 duration-200 hover:shadow-xl cursor-pointer">
               <h2 className="text-xl font-bold">
                 Dr. {teleconsultor.firstName} {teleconsultor.lastName}
               </h2>
-              <p>Rate: ${teleconsultor.teleconsultor.rate}</p>
-              <div className="flex items-center">
-                {renderStars(teleconsultor.teleconsultor.rating)}
-                <span className="ml-2">{teleconsultor.teleconsultor.rating.toFixed(1)}</span> {/* Display the numeric rating */}
-              </div>
-              <button
-                className="mt-4 bg-blue-600 text-white py-2 px-4 rounded"
-                onClick={() => handleBookNow(teleconsultor.teleconsultor.id)} // Pass teleconsultorId
-              >
-                Book Now
-              </button>
+              {/* Check if Teleconsultor exists before rendering */}
+              {teleconsultor.Teleconsultor.length > 0 ? (
+                <>
+                  <p>Rate: ${teleconsultor.Teleconsultor[0].rate}</p>
+                  <div className="flex items-center">
+                    {renderStars(teleconsultor.Teleconsultor[0].rating)}
+                    <span className="ml-2">{teleconsultor.Teleconsultor[0].rating.toFixed(1)}</span>
+                  </div>
+                  <button
+                    className="mt-4 bg-blue-600 text-white py-2 px-4 rounded"
+                    onClick={() => handleBookNow(teleconsultor.Teleconsultor[0].id)} // Pass teleconsultorId
+                  >
+                    Book Now
+                  </button>
+                </>
+              ) : (
+                <p className="text-red-500">Teleconsultor information not available.</p>
+              )}
             </div>
           ))
         )}

@@ -28,6 +28,7 @@
     "leaflet": "^1.9.4",
     "lodash": "4.17.21",
     "mapbox-gl": "^3.7.0",
+    "markdown-it": "^14.1.0",
     "moment": "2.29.4",
     "next": "^14.2.14",
     "next-iron-session": "^4.2.0",

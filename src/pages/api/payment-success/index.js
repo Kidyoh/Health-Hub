@@ -89,12 +89,10 @@ async function handler(req, res) {
     console.log("Transaction references generated:", { userTxRef, teleconsultorTxRef, adminTxRef });
 
     // Step 6: Generate PDF receipt
-    const receiptFilePath = path.join(__dirname, `../../public/receipts/receipt-${userTxRef}.pdf`);
-    generateReceiptPDF({
+    const receiptFilePath = generateReceiptPDF({
       txRef: userTxRef,
       amount: userAmount,
       teleconsultation,
-      receiptFilePath,
     });
     console.log("PDF receipt generated at:", receiptFilePath);
 
@@ -176,8 +174,9 @@ async function handler(req, res) {
 }
 
 // Generate the receipt PDF
-function generateReceiptPDF({ txRef, amount, teleconsultation, receiptFilePath }) {
-  const receiptDirectory = path.dirname(receiptFilePath);
+function generateReceiptPDF({ txRef, amount, teleconsultation }) {
+  // Construct an absolute path to the public/receipts directory
+  const receiptDirectory = path.resolve('./public/receipts');
 
   // Ensure the receipts directory exists
   if (!fs.existsSync(receiptDirectory)) {
@@ -185,8 +184,11 @@ function generateReceiptPDF({ txRef, amount, teleconsultation, receiptFilePath }
     console.log("Receipt directory created:", receiptDirectory);
   }
 
+  // Build the absolute path to the receipt file
+  const receiptFile = path.join(receiptDirectory, `receipt-${txRef}.pdf`);
+
   const doc = new PDFDocument();
-  doc.pipe(fs.createWriteStream(receiptFilePath));
+  doc.pipe(fs.createWriteStream(receiptFile));
 
   doc.fontSize(25).text('Teleconsultation Receipt', { align: 'center' });
 
@@ -201,7 +203,9 @@ function generateReceiptPDF({ txRef, amount, teleconsultation, receiptFilePath }
 
   doc.end();
 
-  console.log("Receipt PDF generated successfully.");
+  console.log("Receipt PDF generated successfully at:", receiptFile);
+
+  return receiptFile; // Return the receipt file path
 }
 
 // Nodemailer email sender function

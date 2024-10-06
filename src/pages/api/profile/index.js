@@ -50,6 +50,68 @@ async function handler(req, res) {
     }
   }
 
+  if (req.method === 'PUT') {
+    const {
+      firstName,
+      lastName,
+      location,
+      phone,
+      rate,
+      doctorInfo,
+      specialties,
+      workingHours,
+      services,
+      hours,
+      contact,
+      type,
+    } = req.body;
+
+    try {
+      // Step 1: Update basic user fields
+      const updatedUser = await prisma.user.update({
+        where: { id: userId },
+        data: {
+          firstName,
+          lastName,
+          location,
+          phone,
+        },
+      });
+
+      // Step 2: If the user is a TELECONSULTER, update teleconsultor-related data
+      if (session.role === 'TELECONSULTER') {
+        await prisma.teleconsultor.update({
+          where: { userId },
+          data: {
+            rate,
+            doctorInfo,
+            specialties,
+            workingHours,
+          },
+        });
+      }
+
+      // Step 3: If the user is a HEALTHCARE_FACILITY, update healthcare facility-related data
+      if (session.role === 'HEALTHCARE_FACILITY') {
+        await prisma.healthcareFacility.update({
+          where: { userId },
+          data: {
+            services,
+            location,
+            hours,
+            contact,
+            type,
+          },
+        });
+      }
+
+      return res.status(200).json({ success: true, message: 'Profile updated successfully' });
+    } catch (error) {
+      console.error('Error updating user profile:', error);
+      return res.status(500).json({ error: 'Error updating user profile' });
+    }
+  }
+
   return res.status(405).json({ error: 'Method not allowed' });
 }
 

@@ -48,6 +48,8 @@ model User {
   Diagnosis Diagnosis[]
 
   ChatSession ChatSession[]
+
+  PaymentMethod PaymentMethod[]
 }
 
 model HealthcareFacility {
@@ -64,6 +66,22 @@ model HealthcareFacility {
   updatedAt    DateTime      @updatedAt
 }
 
+model PaymentMethod {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  type      String   // Payment method type (e.g., 'credit_card', 'paypal', 'chapa', 'stripe')
+  provider  String   // Payment provider name (e.g., 'Visa', 'Mastercard', 'PayPal', etc.)
+  last4     String?  // Last 4 digits of the card for display
+  cardType  String?  // Type of card (Visa, MasterCard, etc.)
+  expMonth  Int?     // Expiry Month for cards
+  expYear   Int?     // Expiry Year for cards
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+}
 model ChatSession {
   id            Int        @id @default(autoincrement())
   userId        Int        // User who started the session
