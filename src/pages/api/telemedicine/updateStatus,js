@@ -1,0 +1,37 @@
+import { PrismaClient } from '@prisma/client';
+
+const prisma = new PrismaClient();
+
+async function handler(req, res) {
+  const { teleconsultationId, status } = req.body;
+
+  if (!teleconsultationId || !status) {
+    return res.status(400).json({ error: 'Teleconsultation ID and status are required.' });
+  }
+
+  try {
+    const teleconsultation = await prisma.teleconsultation.update({
+      where: { id: parseInt(teleconsultationId) },
+      data: { status },
+    });
+
+    // Notify the user when status is updated to "Approved"
+    if (status === 'Approved') {
+      const content = 'Your teleconsultation has been approved.';
+      await prisma.notification.create({
+        data: {
+          userId: teleconsultation.userId,
+          type: 'SessionApproved',
+          content,
+        },
+      });
+    }
+
+    return res.status(200).json({ success: true, teleconsultation });
+  } catch (error) {
+    console.error('Error updating teleconsultation status:', error);
+    return res.status(500).json({ error: 'Failed to update teleconsultation status.' });
+  }
+}
+
+export default handler;
