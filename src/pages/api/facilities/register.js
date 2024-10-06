@@ -1,16 +1,27 @@
-// /pages/api/facility/register.js
-
 import { PrismaClient } from '@prisma/client';
-import bcrypt from 'bcryptjs';
+import bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient();
 
 export default async function handler(req, res) {
   if (req.method === 'POST') {
-    const { firstName, lastName, email, password, name, location, services, hours, contact, type } = req.body;
+    const {
+      firstName,
+      lastName,
+      email,
+      password,
+      location: userLocation,
+      phone,
+      name, // Facility name
+      facilityLocation, // Facility-specific location
+      services,
+      hours,
+      contact, // Facility-specific contact number
+      type
+    } = req.body;
 
     // Check if all required fields are provided
-    if (!firstName || !lastName || !email || !password || !name || !location || !services || !hours || !contact || !type) {
+    if (!firstName || !lastName || !email || !password || !name || !facilityLocation || !services || !hours || !contact || !type) {
       return res.status(400).json({ error: 'All fields are required' });
     }
 
@@ -34,6 +45,8 @@ export default async function handler(req, res) {
           lastName,
           email,
           password: hashedPassword,
+          location: userLocation, // This is the user's personal location
+          phone, // User's personal phone number
           role: 'HEALTHCARE_FACILITY', // Assign the user as a healthcare facility
         },
       });
@@ -42,12 +55,14 @@ export default async function handler(req, res) {
       const facility = await prisma.healthcareFacility.create({
         data: {
           name,
-          location,
+          location: facilityLocation, // Facility-specific location
           services,
           hours,
-          contact,
+          contact, // Facility-specific contact number
           type,
-          userId: newUser.id, // Link the facility to the created user
+          user: {
+            connect: { id: newUser.id }, // Link the facility to the created user
+          },
         },
       });
 

@@ -74,9 +74,11 @@ export default function FacilityRegistrationStepper() {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-
+  
     try {
-      const response = await fetch("/api/facility/register", {
+      const hours = `${facilityData.openHours} - ${facilityData.closeHours}`; // Combine opening and closing hours
+  
+      const response = await fetch("/api/facilities/register", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -84,11 +86,12 @@ export default function FacilityRegistrationStepper() {
         body: JSON.stringify({
           ...userData,
           ...facilityData,
+          hours, // Add combined hours
         }),
       });
-
+  
       const data = await response.json();
-
+  
       if (response.ok) {
         alert("Facility registered successfully");
       } else {
@@ -99,7 +102,7 @@ export default function FacilityRegistrationStepper() {
       alert("An error occurred. Please try again.");
     }
   };
-
+  
   return (
     <div className="max-w-2xl mx-auto mt-8">
       <form onSubmit={handleSubmit} className="bg-white shadow-md rounded-lg p-6">

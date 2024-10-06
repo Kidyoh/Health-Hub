@@ -26,8 +26,8 @@ model User {
   lastName          String?
   email             String             @unique
   password          String
-  location          String?
-  phone             String?
+  location          String?            // Personal location of the user
+  phone             String?            // User's personal phone number
   role              Role               @default(USER)
   status            Status             @default(PENDING)
   appointments      Appointment[]
@@ -43,8 +43,23 @@ model User {
   healthcareFacility   HealthcareFacility? @relation(fields: [healthcareFacilityId], references: [id])
   healthcareFacilityId Int?                @unique
 
-  teleconsultor Teleconsultor? 
+  Teleconsultor Teleconsultor[]
 }
+
+model HealthcareFacility {
+  id           Int           @id @default(autoincrement())
+  name         String        // Facility Name
+  location     String        // Facility Location (separate from user location)
+  services     String
+  hours        String
+  contact      String        // Facility contact number (separate from user phone number)
+  type         String        // Type of facility (clinic, hospital, etc.)
+  user         User?         @relation // Linked user who created the facility
+  appointments Appointment[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+}
+
 
 
 model Teleconsultor {
@@ -63,19 +78,6 @@ model Teleconsultor {
 }
 
 
-model HealthcareFacility {
-  id           Int           @id @default(autoincrement())
-  name         String
-  location     String
-  services     String
-  hours        String
-  contact      String
-  type         String
-  user         User?         @relation
-  appointments Appointment[]
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
-}
 
 model Session {
   id           String   @id @default(cuid())
