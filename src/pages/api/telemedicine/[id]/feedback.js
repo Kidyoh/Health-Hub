@@ -28,10 +28,10 @@ async function handler(req, res) {
 
       // Step 2: Lookup the teleconsultor's ID based on the doctor's name
       const teleconsultor = await prisma.teleconsultor.findFirst({
-        where: { name: teleconsultation.doctor }, // Match by the doctor's name
+        where: { doctorName: teleconsultation.doctor }, // Match by the doctor's name
       });
 
-      console.log('Teleconsultor name:', teleconsultation.doctor); // Log doctor's name being used to query teleconsultor
+      console.log('Teleconsultor doctorName:', teleconsultation.doctor); // Log doctor's name being used to query teleconsultor
       console.log('Teleconsultor data:', teleconsultor); // Log teleconsultor data
 
       if (!teleconsultor) {
