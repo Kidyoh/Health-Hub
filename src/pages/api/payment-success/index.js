@@ -206,11 +206,13 @@ function generateReceiptPDF({ txRef, amount, teleconsultation, receiptFilePath }
 
 // Nodemailer email sender function
 async function sendEmailWithReceipt({ to, subject, text, receiptFilePath }) {
+  console.log(process.env.GMAIL_USER, process.env.GMAIL_PASS);  // Make sure this logs the correct credentials
+
   const transporter = nodemailer.createTransport({
     service: 'Gmail',
     auth: {
-      user: process.env.GMAIL_USER, // Your Gmail address
-      pass: process.env.GMAIL_PASS, // Your Gmail password or app password
+      user: process.env.GMAIL_USER, 
+      pass: process.env.GMAIL_PASS,
     },
   });
 
