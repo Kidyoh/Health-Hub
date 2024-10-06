@@ -16,7 +16,7 @@ async function handler(req, res) {
   try {
     // Fetch the teleconsultor and their rate from the Teleconsultor table
     const teleconsultor = await prisma.teleconsultor.findUnique({
-      where: { userId: parseInt(teleconsultorId, 10) },
+      where: { id: parseInt(teleconsultorId, 10) }, // Use the correct field to find the teleconsultor
       include: { user: true }, // Include the related user data
     });
     if (!teleconsultor) return res.status(404).json({ error: 'Teleconsultor not found' });
