@@ -10,18 +10,22 @@ export default async function handler(req, res) {
       lastName,
       email,
       password,
-      location: userLocation,
+      location: userLocation, // User's personal location
       phone,
       name, // Facility name
-      facilityLocation, // Facility-specific location
+      location: facilityLocation, // Facility-specific location
       services,
-      hours,
+      openHours, // Facility opening hours
+      closeHours, // Facility closing hours
       contact, // Facility-specific contact number
-      type
+      type,
     } = req.body;
 
+    // Log the received data for debugging
+    console.log("Received Fields:", { firstName, lastName, email, password, name, facilityLocation, services, openHours, closeHours, contact, type });
+
     // Check if all required fields are provided
-    if (!firstName || !lastName || !email || !password || !name || !facilityLocation || !services || !hours || !contact || !type) {
+    if (!firstName || !lastName || !email || !password || !name || !facilityLocation || !services || !openHours || !closeHours || !contact || !type) {
       return res.status(400).json({ error: 'All fields are required' });
     }
 
@@ -45,7 +49,7 @@ export default async function handler(req, res) {
           lastName,
           email,
           password: hashedPassword,
-          location: userLocation, // This is the user's personal location
+          location: userLocation, // User's personal location
           phone, // User's personal phone number
           role: 'HEALTHCARE_FACILITY', // Assign the user as a healthcare facility
         },
@@ -57,13 +61,19 @@ export default async function handler(req, res) {
           name,
           location: facilityLocation, // Facility-specific location
           services,
-          hours,
+          hours: `${openHours} - ${closeHours}`, // Combine open and close hours
           contact, // Facility-specific contact number
           type,
           user: {
             connect: { id: newUser.id }, // Link the facility to the created user
           },
         },
+      });
+
+      // Step 3: Update the user with the `healthcareFacilityId`
+      await prisma.user.update({
+        where: { id: newUser.id },
+        data: { healthcareFacilityId: facility.id },
       });
 
       // Respond with success
@@ -76,5 +86,6 @@ export default async function handler(req, res) {
     // If the request is not a POST, respond with an error
     res.status(405).json({ error: 'Method not allowed' });
   }
+
   prisma.$disconnect();
 }

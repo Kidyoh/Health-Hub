@@ -1,19 +1,16 @@
-import { withIronSession } from 'next-iron-session';
+// /pages/api/facilities/getFacilities.ts
 import { PrismaClient } from '@prisma/client';
+import { withIronSession } from 'next-iron-session';
 
 const prisma = new PrismaClient();
 
 async function handler(req, res) {
-  console.log('Received request for getFacilities API');
   const session = req.session.get('user');
-
   if (!session) {
-    console.log('Unauthorized access attempt');
     return res.status(401).json({ error: 'Unauthorized' });
   }
 
   try {
-    console.log('Fetching approved healthcare facilities and pharmacies');
     const facilities = await prisma.healthcareFacility.findMany({
       where: {
         user: {
@@ -30,10 +27,8 @@ async function handler(req, res) {
       },
     });
 
-    console.log('Fetched facilities:', facilities);
     return res.status(200).json({ success: true, facilities });
   } catch (error) {
-    console.error('Error fetching facilities:', error);
     return res.status(500).json({ error: 'Failed to fetch facilities' });
   }
 }

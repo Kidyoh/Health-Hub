@@ -1,31 +1,38 @@
 "use client";
 import { useState, ChangeEvent, FormEvent } from "react";
 
+// User data structure for form
 interface UserData {
   firstName: string;
   lastName: string;
   email: string;
   password: string;
+  location: string; // User's personal location
+  phone: string;    // User's personal phone number
 }
 
+// Facility data structure for form
 interface FacilityData {
   name: string;
-  location: string;
+  location: string; // Facility-specific location
   services: string;
   openHours: string;
   closeHours: string;
-  contact: string;
+  contact: string;  // Facility-specific contact number
   type: string;
 }
 
 export default function FacilityRegistrationStepper() {
-  const [step, setStep] = useState<number>(1);
+  const [step, setStep] = useState<number>(1); // State to control stepper
   const [userData, setUserData] = useState<UserData>({
     firstName: "",
     lastName: "",
     email: "",
     password: "",
+    location: "",
+    phone: "",
   });
+
   const [facilityData, setFacilityData] = useState<FacilityData>({
     name: "",
     location: "",
@@ -36,18 +43,22 @@ export default function FacilityRegistrationStepper() {
     type: "",
   });
 
+  // Handle user data input changes
   const handleUserChange = (e: ChangeEvent<HTMLInputElement>) => {
     setUserData({ ...userData, [e.target.name]: e.target.value });
   };
 
+  // Handle facility data input changes
   const handleFacilityChange = (e: ChangeEvent<HTMLInputElement>) => {
     setFacilityData({ ...facilityData, [e.target.name]: e.target.value });
   };
 
+  // Move to the next step
   const handleNext = () => {
     setStep(step + 1);
   };
 
+  // Go back to the previous step
   const handlePrevious = () => {
     setStep(step - 1);
   };
@@ -72,12 +83,11 @@ export default function FacilityRegistrationStepper() {
     }
   };
 
-  const handleSubmit = async (e: FormEvent) => {
+ // Frontend submission handler (unchanged)
+const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
   
     try {
-      const hours = `${facilityData.openHours} - ${facilityData.closeHours}`; // Combine opening and closing hours
-  
       const response = await fetch("/api/facilities/register", {
         method: "POST",
         headers: {
@@ -85,8 +95,7 @@ export default function FacilityRegistrationStepper() {
         },
         body: JSON.stringify({
           ...userData,
-          ...facilityData,
-          hours, // Add combined hours
+          ...facilityData, // Send all the data to the backend
         }),
       });
   
@@ -103,167 +112,199 @@ export default function FacilityRegistrationStepper() {
     }
   };
   
+
   return (
-    <div className="max-w-2xl mx-auto mt-8">
-      <form onSubmit={handleSubmit} className="bg-white shadow-md rounded-lg p-6">
+    <div className="max-w-2xl mx-auto mt-8 p-4 bg-white rounded-lg shadow-lg">
+      <form onSubmit={handleSubmit} className="space-y-8">
+        {/* Step 1: User Information */}
         {step === 1 && (
           <div>
             <h2 className="text-2xl font-bold mb-4">Step 1: User Information</h2>
-            <div className="mb-4">
-              <label className="block text-gray-700">First Name:</label>
-              <input
-                type="text"
-                name="firstName"
-                value={userData.firstName}
-                onChange={handleUserChange}
-                className="w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring focus:ring-indigo-200"
-                required
-              />
+            <div className="grid grid-cols-1 gap-6">
+              <div>
+                <label className="block text-gray-700">First Name:</label>
+                <input
+                  type="text"
+                  name="firstName"
+                  value={userData.firstName}
+                  onChange={handleUserChange}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring focus:ring-indigo-500"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700">Last Name:</label>
+                <input
+                  type="text"
+                  name="lastName"
+                  value={userData.lastName}
+                  onChange={handleUserChange}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring focus:ring-indigo-500"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700">Email:</label>
+                <input
+                  type="email"
+                  name="email"
+                  value={userData.email}
+                  onChange={handleUserChange}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring focus:ring-indigo-500"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700">Password:</label>
+                <input
+                  type="password"
+                  name="password"
+                  value={userData.password}
+                  onChange={handleUserChange}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring focus:ring-indigo-500"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700">Phone:</label>
+                <input
+                  type="text"
+                  name="phone"
+                  value={userData.phone}
+                  onChange={handleUserChange}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring focus:ring-indigo-500"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700">Location:</label>
+                <input
+                  type="text"
+                  name="location"
+                  value={userData.location}
+                  onChange={handleUserChange}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring focus:ring-indigo-500"
+                  required
+                />
+              </div>
             </div>
-            <div className="mb-4">
-              <label className="block text-gray-700">Last Name:</label>
-              <input
-                type="text"
-                name="lastName"
-                value={userData.lastName}
-                onChange={handleUserChange}
-                className="w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring focus:ring-indigo-200"
-                required
-              />
+            <div className="mt-6 flex justify-end">
+              <button
+                type="button"
+                onClick={handleNext}
+                className="px-6 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition"
+              >
+                Next
+              </button>
             </div>
-            <div className="mb-4">
-              <label className="block text-gray-700">Email:</label>
-              <input
-                type="email"
-                name="email"
-                value={userData.email}
-                onChange={handleUserChange}
-                className="w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring focus:ring-indigo-200"
-                required
-              />
-            </div>
-            <div className="mb-6">
-              <label className="block text-gray-700">Password:</label>
-              <input
-                type="password"
-                name="password"
-                value={userData.password}
-                onChange={handleUserChange}
-                className="w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring focus:ring-indigo-200"
-                required
-              />
-            </div>
-            <button
-              type="button"
-              onClick={handleNext}
-              className="bg-indigo-600 text-white py-2 px-4 rounded hover:bg-indigo-700 transition"
-            >
-              Next
-            </button>
           </div>
         )}
 
+        {/* Step 2: Facility Information */}
         {step === 2 && (
           <div>
             <h2 className="text-2xl font-bold mb-4">Step 2: Facility Information</h2>
-            <div className="mb-4">
-              <label className="block text-gray-700">Facility Name:</label>
-              <input
-                type="text"
-                name="name"
-                value={facilityData.name}
-                onChange={handleFacilityChange}
-                className="w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring focus:ring-indigo-200"
-                required
-              />
+            <div className="grid grid-cols-1 gap-6">
+              <div>
+                <label className="block text-gray-700">Facility Name:</label>
+                <input
+                  type="text"
+                  name="name"
+                  value={facilityData.name}
+                  onChange={handleFacilityChange}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring focus:ring-indigo-500"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700">Location:</label>
+                <input
+                  type="text"
+                  name="location"
+                  value={facilityData.location}
+                  onChange={handleFacilityChange}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring focus:ring-indigo-500"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={handleGetLocation}
+                  className="mt-2 text-blue-500 hover:underline"
+                >
+                  Use my current location
+                </button>
+              </div>
+              <div>
+                <label className="block text-gray-700">Services:</label>
+                <input
+                  type="text"
+                  name="services"
+                  value={facilityData.services}
+                  onChange={handleFacilityChange}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring focus:ring-indigo-500"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700">Opening Hours:</label>
+                <input
+                  type="time"
+                  name="openHours"
+                  value={facilityData.openHours}
+                  onChange={handleFacilityChange}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring focus:ring-indigo-500"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700">Closing Hours:</label>
+                <input
+                  type="time"
+                  name="closeHours"
+                  value={facilityData.closeHours}
+                  onChange={handleFacilityChange}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring focus:ring-indigo-500"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700">Contact:</label>
+                <input
+                  type="text"
+                  name="contact"
+                  value={facilityData.contact}
+                  onChange={handleFacilityChange}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring focus:ring-indigo-500"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700">Type:</label>
+                <input
+                  type="text"
+                  name="type"
+                  value={facilityData.type}
+                  onChange={handleFacilityChange}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring focus:ring-indigo-500"
+                  required
+                />
+              </div>
             </div>
-            <div className="mb-4">
-              <label className="block text-gray-700">Location:</label>
-              <input
-                type="text"
-                name="location"
-                value={facilityData.location}
-                onChange={handleFacilityChange}
-                className="w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring focus:ring-indigo-200"
-                required
-              />
+            <div className="mt-6 flex justify-between">
               <button
                 type="button"
-                onClick={handleGetLocation}
-                className="mt-2 text-blue-500 hover:underline"
+                onClick={handlePrevious}
+                className="px-6 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition"
               >
-                Use my current location
+                Previous
+              </button>
+              <button
+                type="submit"
+                className="px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition"
+              >
+                Submit
               </button>
             </div>
-            <div className="mb-4">
-              <label className="block text-gray-700">Services:</label>
-              <input
-                type="text"
-                name="services"
-                value={facilityData.services}
-                onChange={handleFacilityChange}
-                className="w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring focus:ring-indigo-200"
-                required
-              />
-            </div>
-            <div className="mb-4">
-              <label className="block text-gray-700">Opening Hours:</label>
-              <input
-                type="time"
-                name="openHours"
-                value={facilityData.openHours}
-                onChange={handleFacilityChange}
-                className="w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring focus:ring-indigo-200"
-                required
-              />
-            </div>
-            <div className="mb-4">
-              <label className="block text-gray-700">Closing Hours:</label>
-              <input
-                type="time"
-                name="closeHours"
-                value={facilityData.closeHours}
-                onChange={handleFacilityChange}
-                className="w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring focus:ring-indigo-200"
-                required
-              />
-            </div>
-            <div className="mb-4">
-              <label className="block text-gray-700">Contact:</label>
-              <input
-                type="text"
-                name="contact"
-                value={facilityData.contact}
-                onChange={handleFacilityChange}
-                className="w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring focus:ring-indigo-200"
-                required
-              />
-            </div>
-            <div className="mb-6">
-              <label className="block text-gray-700">Type:</label>
-              <input
-                type="text"
-                name="type"
-                value={facilityData.type}
-                onChange={handleFacilityChange}
-                className="w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring focus:ring-indigo-200"
-                required
-              />
-            </div>
-
-            <button
-              type="button"
-              onClick={handlePrevious}
-              className="bg-gray-500 text-white py-2 px-4 rounded hover:bg-gray-600 transition mr-2"
-            >
-              Previous
-            </button>
-            <button
-              type="submit"
-              className="bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700 transition"
-            >
-              Submit
-            </button>
           </div>
         )}
       </form>
