@@ -16,16 +16,27 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({ isOpen, onClose, consulta
   const [error, setError] = useState<string | null>(null);
 
   const submitFeedback = async () => {
+    const feedbackData = { rating, feedback };
+    console.log("Submitting feedback:", feedbackData); // Log the feedback data
+
     try {
-      await fetch(`/api/telemedicine/${consultationId}/feedback`, {
+      const response = await fetch(`/api/telemedicine/${consultationId}/feedback`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ rating, feedback }),
+        body: JSON.stringify(feedbackData),
       });
-      alert("Thank you for your feedback.");
-      onClose(); // Close the modal after submission
+
+      const responseData = await response.json();
+      console.log("Response from server:", responseData); // Log the response data
+
+      if (response.ok) {
+        alert("Thank you for your feedback.");
+        onClose(); // Close the modal after submission
+      } else {
+        setError(responseData.error || "Failed to submit feedback.");
+      }
     } catch (err) {
       console.error("Error submitting feedback:", err);
       setError("Failed to submit feedback.");

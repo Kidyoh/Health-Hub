@@ -24,10 +24,15 @@ async function handler(req, res) {
         return res.status(404).json({ error: 'Teleconsultation not found.' });
       }
 
-      // Step 2: Lookup the teleconsultor's ID based on the userId (as the teleconsultor's data is linked to the user)
-      const teleconsultor = await prisma.teleconsultor.findUnique({
-        where: { userId: teleconsultation.userId }, // Match by the userId of the teleconsultation
+      console.log('Teleconsultation data:', teleconsultation); // Log teleconsultation data
+
+      // Step 2: Lookup the teleconsultor's ID based on the doctor's name
+      const teleconsultor = await prisma.teleconsultor.findFirst({
+        where: { name: teleconsultation.doctor }, // Match by the doctor's name
       });
+
+      console.log('Teleconsultor name:', teleconsultation.doctor); // Log doctor's name being used to query teleconsultor
+      console.log('Teleconsultor data:', teleconsultor); // Log teleconsultor data
 
       if (!teleconsultor) {
         return res.status(404).json({ error: 'Teleconsultor not found.' });
@@ -38,6 +43,7 @@ async function handler(req, res) {
         data: {
           userId: session.id, // User who gave the feedback
           teleconsultationId: teleconsultation.id, // Relate feedback to the teleconsultation
+          teleconsultorId: teleconsultor.id, // Relate feedback to the teleconsultor
           content: feedback,
           rating,
         },
@@ -45,13 +51,13 @@ async function handler(req, res) {
 
       // Step 4: Calculate the new average rating for the teleconsultor
       const avgRating = await prisma.feedback.aggregate({
-        where: { teleconsultationId: teleconsultation.id },
+        where: { teleconsultorId: teleconsultor.id }, // Aggregate ratings for the teleconsultor
         _avg: { rating: true },
       });
 
       // Step 5: Update the teleconsultor's rating in the Teleconsultor model
       await prisma.teleconsultor.update({
-        where: { userId: teleconsultor.userId },
+        where: { id: teleconsultor.id },
         data: { rating: avgRating._avg.rating }, 
       });
 
