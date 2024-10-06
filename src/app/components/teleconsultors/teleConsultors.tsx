@@ -9,8 +9,10 @@ interface Teleconsultor {
   id: number;
   firstName: string;
   lastName: string;
-  rate: number;
-  rating: number; // Add rating to the interface
+  teleconsultor: {
+    rate: number;
+    rating: number;
+  };
 }
 
 const TeleconsultorsList = () => {
@@ -48,7 +50,7 @@ const TeleconsultorsList = () => {
     const validRating = Math.max(0, Math.min(rating, totalStars)); // Ensure rating is between 0 and totalStars
     const filledStars = Math.floor(validRating);
     const halfStar = validRating % 1 !== 0;
-    const emptyStars = totalStars - filledStars - (halfStar ? 1 : 0);
+    const emptyStars = Math.max(totalStars - filledStars - (halfStar ? 1 : 0), 0); // Safeguard against negative emptyStars
 
     return (
       <div className="flex items-center">
@@ -91,10 +93,10 @@ const TeleconsultorsList = () => {
               <h2 className="text-xl font-bold">
                 Dr. {teleconsultor.firstName} {teleconsultor.lastName}
               </h2>
-              <p>Rate: ${teleconsultor.rate}</p>
+              <p>Rate: ${teleconsultor.teleconsultor.rate}</p>
               <div className="flex items-center">
-                {renderStars(teleconsultor.rating)}
-                <span className="ml-2">{teleconsultor.rating.toFixed(1)}</span> {/* Display the numeric rating */}
+                {renderStars(teleconsultor.teleconsultor.rating)}
+                <span className="ml-2">{teleconsultor.teleconsultor.rating.toFixed(1)}</span> {/* Display the numeric rating */}
               </div>
               <button
                 className="mt-4 bg-blue-600 text-white py-2 px-4 rounded"

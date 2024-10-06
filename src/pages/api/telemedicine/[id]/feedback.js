@@ -24,12 +24,9 @@ async function handler(req, res) {
         return res.status(404).json({ error: 'Teleconsultation not found.' });
       }
 
-      // Step 2: Lookup the teleconsultor's ID (User ID) based on the doctor’s name
-      const teleconsultor = await prisma.user.findFirst({
-        where: {
-          role: 'TELECONSULTER', // Ensure it's a user with the Teleconsultor role
-          firstName: teleconsultation.doctor, // Match by the doctor's name from the teleconsultation
-        },
+      // Step 2: Lookup the teleconsultor's ID based on the userId (as the teleconsultor's data is linked to the user)
+      const teleconsultor = await prisma.teleconsultor.findUnique({
+        where: { userId: teleconsultation.userId }, // Match by the userId of the teleconsultation
       });
 
       if (!teleconsultor) {
@@ -41,7 +38,6 @@ async function handler(req, res) {
         data: {
           userId: session.id, // User who gave the feedback
           teleconsultationId: teleconsultation.id, // Relate feedback to the teleconsultation
-          teleconsultorId: teleconsultor.id, // Relate feedback to the teleconsultor (doctor)
           content: feedback,
           rating,
         },
@@ -49,14 +45,14 @@ async function handler(req, res) {
 
       // Step 4: Calculate the new average rating for the teleconsultor
       const avgRating = await prisma.feedback.aggregate({
-        where: { teleconsultorId: teleconsultor.id },
+        where: { teleconsultationId: teleconsultation.id },
         _avg: { rating: true },
       });
 
-      // Step 5: Update the teleconsultor's rating in the User model
-      await prisma.user.update({
-        where: { id: teleconsultor.id },
-        data: { rate: avgRating._avg.rating }, 
+      // Step 5: Update the teleconsultor's rating in the Teleconsultor model
+      await prisma.teleconsultor.update({
+        where: { userId: teleconsultor.userId },
+        data: { rating: avgRating._avg.rating }, 
       });
 
       return res.status(200).json({ success: true, message: 'Feedback submitted and teleconsultor rating updated.' });

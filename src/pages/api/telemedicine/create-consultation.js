@@ -14,14 +14,18 @@ async function handler(req, res) {
   if (!gateway || !teleconsultorId || !date) return res.status(400).json({ error: 'Missing required fields' });
 
   try {
-    const teleconsultor = await prisma.user.findUnique({ where: { id: parseInt(teleconsultorId, 10) } });
+    // Fetch the teleconsultor and their rate from the Teleconsultor table
+    const teleconsultor = await prisma.teleconsultor.findUnique({
+      where: { userId: parseInt(teleconsultorId, 10) },
+      include: { user: true }, // Include the related user data
+    });
     if (!teleconsultor) return res.status(404).json({ error: 'Teleconsultor not found' });
 
     // Create a teleconsultation entry
     const teleconsultation = await prisma.teleconsultation.create({
       data: {
         userId: session.id,
-        doctor: `${teleconsultor.firstName} ${teleconsultor.lastName}`,
+        doctor: `${teleconsultor.user.firstName} ${teleconsultor.user.lastName}`,
         date: new Date(date),
         status: 'Pending Payment',
       },
@@ -49,7 +53,7 @@ async function handler(req, res) {
             price_data: {
               currency: 'usd',
               product_data: {
-                name: `Consultation with ${teleconsultor.firstName}`,
+                name: `Consultation with ${teleconsultor.user.firstName}`,
               },
               unit_amount: teleconsultor.rate * 100,
             },
