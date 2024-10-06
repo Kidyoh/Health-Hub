@@ -19,7 +19,7 @@ export default async function handler(req, res) {
       content: article.description || 'No description available.',
       author: article.author || 'Unknown author',
       url: article.url || '#',
-      imageUrl: article.urlToImage || '/public/images/blog/blog-img1.jpg',
+      imageUrl: article.urlToImage || '/images/blog/blog-img1.jpg',
       category: 'Health',
     }));
 
