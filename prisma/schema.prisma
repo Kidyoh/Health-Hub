@@ -52,8 +52,7 @@ model Teleconsultor {
   userId       Int      @unique
   workingHours String?
   specialties  String?
-  doctorInfo   String? 
-  doctorName   String// Additional doctor-related information
+  doctorInfo   String? // Additional doctor-related information
   rate         Float?  // Rate for teleconsultation
   rating       Float?  // Average rating from feedback
   createdAt    DateTime @default(now())

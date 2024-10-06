@@ -26,7 +26,7 @@ const ConsultationPage: React.FC = () => {
       <ConsultationDashboard consultationId={Number(consultationId)} onClose={handleCloseDashboard} />
 
       {/* Feedback Form */}
-      {isFeedbackVisible && (
+      {/* {isFeedbackVisible && (
         <div className="mt-6">
           <FeedbackForm 
             consultationId={Number(consultationId)} 
@@ -34,7 +34,7 @@ const ConsultationPage: React.FC = () => {
             onClose={() => setIsFeedbackVisible(false)} 
           />
         </div>
-      )}
+      )} */}
     </div>
   );
 };
