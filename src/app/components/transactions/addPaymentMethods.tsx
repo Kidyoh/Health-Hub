@@ -39,60 +39,75 @@ const AddPaymentMethod: React.FC<AddPaymentMethodProps> = ({ onPaymentMethodAdde
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <h2>Add Payment Method</h2>
-      <div>
-        <label>Provider</label>
+    <form onSubmit={handleSubmit} className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md max-w-md mx-auto">
+      <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-200 mb-6">Add Payment Method</h2>
+      
+      <div className="mb-4">
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Provider</label>
         <input 
           type="text" 
           value={provider} 
           onChange={(e) => setProvider(e.target.value)} 
+          className="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           placeholder="e.g., Visa, MasterCard" 
           required 
         />
       </div>
-      <div>
-        <label>Last 4 digits</label>
+
+      <div className="mb-4">
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Last 4 digits</label>
         <input 
           type="text" 
           value={last4} 
           onChange={(e) => setLast4(e.target.value)} 
-          maxLength={4} 
+          maxLength={4}
+          className="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           required 
         />
       </div>
-      <div>
-        <label>Card Type</label>
+
+      <div className="mb-4">
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Card Type</label>
         <input 
           type="text" 
           value={cardType} 
           onChange={(e) => setCardType(e.target.value)} 
+          className="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           placeholder="e.g., Credit, Debit" 
           required 
         />
       </div>
-      <div>
-        <label>Expiration Month</label>
+
+      <div className="mb-4">
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Expiration Month</label>
         <input 
           type="number" 
           value={expMonth} 
           onChange={(e) => setExpMonth(e.target.value)} 
           min="1" 
-          max="12" 
+          max="12"
+          className="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           required 
         />
       </div>
-      <div>
-        <label>Expiration Year</label>
+
+      <div className="mb-4">
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Expiration Year</label>
         <input 
           type="number" 
           value={expYear} 
           onChange={(e) => setExpYear(e.target.value)} 
-          min="2023" 
+          min="2023"
+          className="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           required 
         />
       </div>
-      <button type="submit" disabled={loading}>
+
+      <button 
+        type="submit" 
+        className={`w-full p-2 bg-blue-600 text-white rounded-md shadow hover:bg-blue-700 transition duration-300 ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+        disabled={loading}
+      >
         {loading ? 'Adding...' : 'Add Payment Method'}
       </button>
     </form>

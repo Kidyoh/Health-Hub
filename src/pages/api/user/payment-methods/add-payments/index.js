@@ -24,8 +24,8 @@ async function handler(req, res) {
           provider,
           last4,
           cardType,
-          expMonth,
-          expYear,
+          expMonth: parseInt(expMonth),
+          expYear: parseInt(expYear),
         },
       });
 
