@@ -57,8 +57,8 @@ async function handler(req, res) {
           },
         ],
         mode: 'payment',
-        success_url: `${process.env.NEXT_PUBLIC_URL}/payment-success?teleconsultationId=${teleconsultation.id}&appointmentId=${appointment.id}`,
-        cancel_url: `${process.env.NEXT_PUBLIC_URL}/payment-cancel`,
+        success_url: `${process.env.NEXT_PUBLIC_URL}/user/payment-success?teleconsultationId=${teleconsultation.id}&appointmentId=${appointment.id}`,
+        cancel_url: `${process.env.NEXT_PUBLIC_URL}/user/payment-cancel`,
         metadata: {
           teleconsultationId: teleconsultation.id,
           appointmentId: appointment.id,
@@ -73,8 +73,8 @@ async function handler(req, res) {
           currency: 'ETB',
           email: session.email,
           tx_ref: `tx-${teleconsultation.id}`,
-          callback_url: `${process.env.NEXT_PUBLIC_URL}/payment-success?teleconsultationId=${teleconsultation.id}&appointmentId=${appointment.id}`,
-          return_url: `${process.env.NEXT_PUBLIC_URL}/payment-success?teleconsultationId=${teleconsultation.id}&appointmentId=${appointment.id}`,
+          callback_url: `${process.env.NEXT_PUBLIC_URL}/user/payment-success?teleconsultationId=${teleconsultation.id}&appointmentId=${appointment.id}`,
+          return_url: `${process.env.NEXT_PUBLIC_URL}/user/payment-success?teleconsultationId=${teleconsultation.id}&appointmentId=${appointment.id}`,
         },
         {
           headers: {

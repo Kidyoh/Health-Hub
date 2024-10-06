@@ -36,17 +36,17 @@ const SidebarContent = {
           name: "My Appointments",
           icon: "solar:calendar-date-outline",
           id: uniqueId(),
-          url: "/appointments",
+          url: "/user/appointments",
           children: [
             {
               name: "Upcoming Appointments",
               id: uniqueId(),
-              url: "/appointments/upcoming",
+              url: "/user/appointments/upcoming",
             },
             {
               name: "Appointment History",
               id: uniqueId(),
-              url: "/appointments/history",
+              url: "/user/appointments/history",
             },
           ],
         },
@@ -54,19 +54,31 @@ const SidebarContent = {
           name: "Teleconsultations",
           icon: "solar:call-outline",
           id: uniqueId(),
-          url: "/teleconsultations",
+          url: "/user/teleconsultations",
         },
         {
           name: "Health Tips",
           icon: "solar:health-square-outline",
           id: uniqueId(),
-          url: "/health-tips",
+          url: "/user/health-tips",
+        },
+        {
+          name: "My Prescriptions",
+          icon: "solar:prescription-outline",
+          id: uniqueId(),
+          url: "/user/prescriptions",
+        },
+        {
+          name: "Medical Records",
+          icon: "solar:file-text-outline",
+          id: uniqueId(),
+          url: "/user/medical-records",
         },
         {
           name: "Profile Settings",
           icon: "solar:settings-outline",
           id: uniqueId(),
-          url: "/profile",
+          url: "/user/profile",
         },
       ],
     },
@@ -77,19 +89,25 @@ const SidebarContent = {
           name: "My Transactions",
           icon: "solar:wallet-outline",
           id: uniqueId(),
-          url: "/transactions",
+          url: "/user/transactions",
           children: [
             {
               name: "Payment History",
               id: uniqueId(),
-              url: "/transactions/history",
+              url: "/user/transactions/history",
             },
             {
               name: "Payment Methods",
               id: uniqueId(),
-              url: "/transactions/methods",
+              url: "/user/transactions/methods",
             },
           ],
+        },
+        {
+          name: "Insurance Claims",
+          icon: "solar:document-outline",
+          id: uniqueId(),
+          url: "/user/insurance-claims",
         },
       ],
     },
@@ -100,17 +118,24 @@ const SidebarContent = {
           name: "Help Center",
           icon: "solar:help-outline",
           id: uniqueId(),
-          url: "/support/help-center",
+          url: "/user/support/help-center",
         },
         {
           name: "Submit a Ticket",
           icon: "solar:message-outline",
           id: uniqueId(),
-          url: "/support/ticket",
+          url: "/user/support/ticket",
+        },
+        {
+          name: "Live Chat",
+          icon: "solar:chat-outline",
+          id: uniqueId(),
+          url: "/user/support/live-chat",
         },
       ],
     },
   ],
+
 
   TELECONSULTER: [
     {
@@ -143,13 +168,19 @@ const SidebarContent = {
       ],
     },
     {
-      heading: "APPOINTMENTS",
+      heading: "SETTINGS",
       children: [
         {
-          name: "Manage Teleconsultations",
-          icon: "solar:call-outline",
+          name: "Profile Settings",
+          icon: "solar:settings-outline",
           id: uniqueId(),
-          url: "/manage-teleconsultations",
+          url: "/profile",
+        },
+        {
+          name: "Availability",
+          icon: "solar:clock-outline",
+          id: uniqueId(),
+          url: "/availability",
         },
       ],
     },
@@ -170,24 +201,8 @@ const SidebarContent = {
         },
       ],
     },
-    {
-      heading: "SETTINGS",
-      children: [
-        {
-          name: "Profile Settings",
-          icon: "solar:settings-outline",
-          id: uniqueId(),
-          url: "/profile",
-        },
-        {
-          name: "Availability",
-          icon: "solar:clock-outline",
-          id: uniqueId(),
-          url: "/availability",
-        },
-      ],
-    },
   ],
+
 
   HEALTHCARE_FACILITY: [
     {
@@ -239,66 +254,6 @@ const SidebarContent = {
           icon: "solar:wallet-outline",
           id: uniqueId(),
           url: "/facility-payments",
-        },
-        {
-          name: "Billing & Invoices",
-          icon: "solar:file-invoice-outline",
-          id: uniqueId(),
-          url: "/billing-invoices",
-        },
-      ],
-    },
-  ],
-
-  PHARMACY: [
-    {
-      heading: "PRESCRIPTIONS",
-      children: [
-        {
-          name: "Prescription Requests",
-          icon: "solar:prescription-outline",
-          id: uniqueId(),
-          url: "/prescriptions",
-        },
-        {
-          name: "Processed Prescriptions",
-          icon: "solar:check-circle-outline",
-          id: uniqueId(),
-          url: "/prescriptions/processed",
-        },
-      ],
-    },
-    {
-      heading: "MANAGEMENT",
-      children: [
-        {
-          name: "Manage Inventory",
-          icon: "solar:boxes-outline",
-          id: uniqueId(),
-          url: "/inventory-management",
-        },
-        {
-          name: "Supplier Management",
-          icon: "solar:truck-outline",
-          id: uniqueId(),
-          url: "/supplier-management",
-        },
-        {
-          name: "Order History",
-          icon: "solar:history-outline",
-          id: uniqueId(),
-          url: "/order-history",
-        },
-      ],
-    },
-    {
-      heading: "PAYMENTS",
-      children: [
-        {
-          name: "Pharmacy Payments",
-          icon: "solar:wallet-outline",
-          id: uniqueId(),
-          url: "/pharmacy-payments",
         },
         {
           name: "Billing & Invoices",
@@ -366,6 +321,18 @@ const SidebarContent = {
           id: uniqueId(),
           url: "/reports/activity",
         },
+        {
+          name: "Consultation Reports",
+          icon: "solar:report-outline",
+          id: uniqueId(),
+          url: "/reports/consultations",
+        },
+        {
+          name: "System Logs",
+          icon: "solar:logs-outline",
+          id: uniqueId(),
+          url: "/system-logs",
+        },
       ],
     },
     {
@@ -383,9 +350,34 @@ const SidebarContent = {
           id: uniqueId(),
           url: "/refund-requests",
         },
+        {
+          name: "System Invoices",
+          icon: "solar:file-invoice-outline",
+          id: uniqueId(),
+          url: "/system-invoices",
+        },
+      ],
+    },
+    {
+      heading: "SUPPORT",
+      children: [
+        {
+          name: "Admin Support",
+          icon: "solar:help-outline",
+          id: uniqueId(),
+          url: "/admin-support",
+        },
+        {
+          name: "Issue Tracker",
+          icon: "solar:issue-outline",
+          id: uniqueId(),
+          url: "/issue-tracker",
+        },
       ],
     },
   ],
 };
 
+
 export default SidebarContent;
+

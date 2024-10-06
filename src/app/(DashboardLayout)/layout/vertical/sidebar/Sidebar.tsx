@@ -90,7 +90,7 @@ const SidebarLayout = () => {
   }
 
 
-  type UserRole = "USER" | "TELECONSULTER" | "HEALTHCARE_FACILITY" | "PHARMACY" | "ADMIN";
+  type UserRole = "USER" | "TELECONSULTER" | "HEALTHCARE_FACILITY" | "ADMIN";
 
   const roleBasedSidebarContent = SidebarContent[userRole as UserRole] || SidebarContent['USER'];
 

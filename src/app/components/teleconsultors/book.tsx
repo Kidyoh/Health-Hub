@@ -22,7 +22,7 @@ const BookTeleconsultation = () => {
     try {
       // Instead of navigating to the payment URL directly,
       // navigate to the payment selection page with teleconsultorId and date as query params
-      router.push(`/teleconsultors/payment-selection?teleconsultorId=${id}&date=${date}`);
+      router.push(`/user/teleconsultors/payment-selection?teleconsultorId=${id}&date=${date}`);
     } catch (error) {
       console.error('Error booking teleconsultation:', error);
     } finally {

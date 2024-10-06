@@ -47,8 +47,8 @@ const TeleconsultationsList: React.FC = () => {
     }
 
     // Navigate to the ConsultationDashboard with consultation ID as a query parameter
-    console.log(`Navigating to /consultations/${consultation.id}`); // Log the URL
-    router.push(`/consultations/${consultation.id}`);
+    console.log(`Navigating to /user/consultations/${consultation.id}`); // Log the URL
+    router.push(`/user/consultations/${consultation.id}`);
   };
 
   return (

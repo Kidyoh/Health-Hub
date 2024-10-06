@@ -43,7 +43,7 @@ const TeleconsultorsList = () => {
   }, []);
 
   const handleBookNow = (id: number) => {
-    router.push(`/teleconsultors/${id}/book`); // Navigate to the booking page
+    router.push(`/user/teleconsultors/${id}/book`); // Navigate to the booking page
   };
 
   const renderStars = (rating: number) => {
