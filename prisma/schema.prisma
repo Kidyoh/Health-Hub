@@ -44,6 +44,8 @@ model User {
   healthcareFacilityId Int?                @unique
 
   Teleconsultor Teleconsultor[]
+
+  Diagnosis Diagnosis[]
 }
 
 model HealthcareFacility {
@@ -58,6 +60,28 @@ model HealthcareFacility {
   appointments Appointment[]
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
+}
+
+model Diagnosis {
+  id                 Int           @id @default(autoincrement())
+  userId             Int           // Reference to the user receiving the diagnosis
+  symptoms           String        // Symptoms described by the user
+  possibleCondition  String        // Possible condition suggested by AI
+  advice             String?       // Advice or suggestions from the AI
+  diagnosisDate      DateTime      @default(now()) // Date and time of diagnosis
+  teleconsultationId Int?          // Reference to the teleconsultation session, if applicable
+  appointmentId      Int?          // Reference to the appointment, if applicable
+
+  user               User          @relation(fields: [userId], references: [id])
+  teleconsultation   Teleconsultation? @relation(fields: [teleconsultationId], references: [id])
+  appointment        Appointment?  @relation(fields: [appointmentId], references: [id])
+
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+
+  @@index([userId])
+  @@index([teleconsultationId])
+  @@index([appointmentId])
 }
 
 
@@ -114,6 +138,7 @@ model Appointment {
   @@index([facilityId])
   @@index([teleconsultationId])
   @@index([feedbackId])
+  Diagnosis Diagnosis[]
 }
 
 model MedicalInformation {
@@ -165,6 +190,7 @@ model Teleconsultation {
   user User @relation(fields: [userId], references: [id])
 
   @@index([userId])
+  Diagnosis Diagnosis[]
 }
 
 model Feedback {
