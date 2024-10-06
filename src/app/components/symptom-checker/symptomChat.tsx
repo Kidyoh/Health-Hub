@@ -1,47 +1,85 @@
 "use client"
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 interface ChatMessage {
   sender: 'user' | 'ai';
   text: string;
 }
 
+interface ChatSession {
+  id: number;
+  sessionName: string;
+}
+
 const SymptomChecker: React.FC = () => {
+  const [userId, setUserId] = useState<number | null>(null); // Fetch userId dynamically
   const [symptoms, setSymptoms] = useState<string>('');
   const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
+  const [chatSessions, setChatSessions] = useState<ChatSession[]>([]);
+  const [currentSessionId, setCurrentSessionId] = useState<number | null>(null);
 
-  // Handle message send
+  useEffect(() => {
+    const fetchUserId = async () => {
+      try {
+        const response = await fetch('/api/user');
+        const data = await response.json();
+        setUserId(data.userId);
+      } catch (error) {
+        console.error("Failed to fetch user session info:", error);
+      }
+    };
+    fetchUserId();
+  }, []);
+  
+
+  // Fetch previous chat sessions when userId is available
+  useEffect(() => {
+    if (userId) {
+      const fetchChatSessions = async () => {
+        try {
+          const response = await fetch(`/api/ai/chat-sessions?userId=${userId}`);
+          const data = await response.json();
+          setChatSessions(data.sessions);
+        } catch (error) {
+          console.error('Failed to fetch chat sessions:', error);
+        }
+      };
+
+      fetchChatSessions();
+    }
+  }, [userId]);
+
   const handleSendMessage = async () => {
-    if (!symptoms) return;
-
-    // Add user message to chat history
+    if (!symptoms || !userId) return;
+  
     setChatHistory((prev) => [...prev, { sender: 'user', text: symptoms }]);
     setLoading(true);
-
+  
     try {
-      // Send the user's input to the AI backend
-      const response = await fetch('/api/symptom-checker', {
+      const response = await fetch('/api/ai/symptom-checker', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ prompt: symptoms }),
+        body: JSON.stringify({
+          prompt: symptoms,
+          userId,  // Attach userId
+          chatSessionId: currentSessionId,  // Attach to existing session if available
+        }),
       });
-
+  
       const data = await response.json();
-
-      // Add AI's response to chat history
+  
       if (response.ok) {
         setChatHistory((prev) => [
           ...prev,
-          { sender: 'ai', text: data.response },
+          { sender: 'ai', text: data.response }, // Display the AI response
         ]);
-      } else {
-        setChatHistory((prev) => [
-          ...prev,
-          { sender: 'ai', text: 'There was an issue generating the response.' },
-        ]);
+        if (!currentSessionId) {
+          // If it's a new session, save the session ID
+          setCurrentSessionId(data.savedDiagnosis.chatSessionId);
+        }
       }
     } catch (error) {
       setChatHistory((prev) => [
@@ -49,42 +87,76 @@ const SymptomChecker: React.FC = () => {
         { sender: 'ai', text: 'An error occurred. Please try again.' },
       ]);
     }
-
+  
     setLoading(false);
-    setSymptoms(''); // Reset the input field
+    setSymptoms('');
+  };
+  
+
+  const loadChatSession = async (sessionId: number) => {
+    setCurrentSessionId(sessionId);
+    // Fetch chat history for the selected session
+    try {
+      const response = await fetch(`/api/ai/chat-session/${sessionId}`);
+      const data = await response.json();
+      setChatHistory(data.diagnoses.map((msg: any) => ({
+        sender: 'ai',
+        text: msg.diagnosisText,
+      })));  // Load previous chat history
+    } catch (error) {
+      console.error('Failed to load chat session:', error);
+    }
   };
 
   return (
-    <div className="max-w-lg mx-auto mt-8 p-4 bg-white rounded-lg shadow-lg">
-      <h2 className="text-2xl font-bold mb-4 text-center">AI Symptom Checker</h2>
-
-      {/* Chat History */}
-      <div className="bg-gray-100 p-4 rounded-lg mb-4 max-h-96 overflow-y-auto">
-        {chatHistory.map((message, index) => (
-          <div key={index} className={`mb-2 ${message.sender === 'user' ? 'text-right' : 'text-left'}`}>
-            <p className={`inline-block p-2 rounded-lg ${message.sender === 'user' ? 'bg-blue-500 text-white' : 'bg-gray-300 text-black'}`}>
-              {message.text}
-            </p>
-          </div>
-        ))}
+    <div className="flex">
+      {/* Sidebar with chat sessions */}
+      <div className="w-1/4 p-4 bg-gray-100">
+        <h2 className="text-lg font-bold">Previous Sessions</h2>
+        <ul>
+          {chatSessions.map((session) => (
+            <li key={session.id}>
+              <button
+                onClick={() => loadChatSession(session.id)}
+                className="text-blue-500 hover:underline"
+              >
+                {session.sessionName}
+              </button>
+            </li>
+          ))}
+        </ul>
       </div>
 
-      {/* Input Field */}
-      <div className="flex">
-        <input
-          type="text"
-          value={symptoms}
-          onChange={(e) => setSymptoms(e.target.value)}
-          placeholder="Describe your symptoms..."
-          className="flex-grow p-2 border rounded-l-lg"
-        />
-        <button
-          onClick={handleSendMessage}
-          className="bg-indigo-600 text-white p-2 rounded-r-lg"
-          disabled={loading}
-        >
-          {loading ? 'Checking...' : 'Send'}
-        </button>
+      {/* Chat Interface */}
+      <div className="flex-grow p-4">
+        <h2 className="text-2xl font-bold">AI Symptom Checker</h2>
+        <div className="bg-gray-100 p-4 rounded-lg mb-4 max-h-96 overflow-y-auto">
+          {chatHistory.map((message, index) => (
+            <div key={index} className={`mb-2 ${message.sender === 'user' ? 'text-right' : 'text-left'}`}>
+              <p className={`inline-block p-2 rounded-lg ${message.sender === 'user' ? 'bg-blue-500 text-white' : 'bg-gray-300 text-black'}`}>
+                {message.text}
+              </p>
+            </div>
+          ))}
+        </div>
+
+        {/* Input field */}
+        <div className="flex">
+          <input
+            type="text"
+            value={symptoms}
+            onChange={(e) => setSymptoms(e.target.value)}
+            placeholder="Describe your symptoms..."
+            className="flex-grow p-2 border rounded-l-lg"
+          />
+          <button
+            onClick={handleSendMessage}
+            className="bg-indigo-600 text-white p-2 rounded-r-lg"
+            disabled={loading}
+          >
+            {loading ? 'Checking...' : 'Send'}
+          </button>
+        </div>
       </div>
     </div>
   );

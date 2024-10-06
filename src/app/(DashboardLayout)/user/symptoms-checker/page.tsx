@@ -1,7 +1,7 @@
 import SymptomChecker from "@/app/components/symptom-checker/symptomChat";
 import React from "react";
 
-const samplepage = () => {
+const SymptomCheckerPage = () => {
   return (
     <>
       <SymptomChecker/>
@@ -9,4 +9,4 @@ const samplepage = () => {
   );
 };
 
-export default samplepage;
+export default SymptomCheckerPage;
