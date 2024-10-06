@@ -39,25 +39,40 @@ async function handler(req, res) {
       return res.status(200).json({ success: true, message: 'Teleconsultation is already approved.' });
     }
 
-    // Step 2: Fetch teleconsultor's rate from the Teleconsultor model
-    const teleconsultor = await prisma.teleconsultor.findUnique({
-      where: {
-        userId: teleconsultation.userId, // Assuming userId links to the teleconsultor
-      },
-    });
+    // Step 2: Find teleconsultor's ID by matching the doctor's name
+const teleconsultorUser = await prisma.user.findFirst({
+  where: {
+    role: 'TELECONSULTER', // Ensure we're matching the Teleconsultor role
+    firstName: teleconsultation.doctor.split(" ")[0], // Match first name from 'doctor' field
+    lastName: teleconsultation.doctor.split(" ")[1], // Match last name from 'doctor' field
+  },
+});
 
-    console.log("Teleconsultor found:", teleconsultor); // Log the teleconsultor data
+if (!teleconsultorUser) {
+  console.log("Teleconsultor not found."); // Log not found error
+  return res.status(404).json({ error: 'Teleconsultor not found.' });
+}
 
-    if (!teleconsultor) {
-      console.log("Teleconsultor not found."); // Log not found error
-      return res.status(404).json({ error: 'Teleconsultor not found.' });
-    }
+// Step 3: Fetch teleconsultor details from Teleconsultor model using userId
+const teleconsultor = await prisma.teleconsultor.findUnique({
+  where: {
+    userId: teleconsultorUser.id, // Match teleconsultor using the userId from User table
+  },
+});
 
-    const teleconsultorRate = teleconsultor.rate;
-    const userAmount = teleconsultorRate; // The amount the user will pay (teleconsultor's rate)
-    const teleconsultorAmount = teleconsultorRate * 0.8; // Teleconsultor gets 80%
+console.log("Teleconsultor found:", teleconsultor); // Log the teleconsultor data
 
-    console.log("Calculated amounts - User Amount:", userAmount, "Teleconsultor Amount:", teleconsultorAmount);
+if (!teleconsultor) {
+  console.log("Teleconsultor details not found."); // Log not found error
+  return res.status(404).json({ error: 'Teleconsultor details not found.' });
+}
+
+const teleconsultorRate = teleconsultor.rate;
+const userAmount = teleconsultorRate; // The amount the user will pay (teleconsultor's rate)
+const teleconsultorAmount = teleconsultorRate * 0.8; // Teleconsultor gets 80%
+
+console.log("Calculated amounts - User Amount:", userAmount, "Teleconsultor Amount:", teleconsultorAmount);
+
 
     // Step 3: Update teleconsultation status to Approved
     await prisma.teleconsultation.update({
@@ -141,6 +156,14 @@ async function handler(req, res) {
 
 // Generate the receipt PDF
 function generateReceiptPDF({ txRef, amount, teleconsultation, receiptFilePath }) {
+  const receiptDirectory = path.dirname(receiptFilePath);
+
+  // Ensure the receipts directory exists
+  if (!fs.existsSync(receiptDirectory)) {
+    fs.mkdirSync(receiptDirectory, { recursive: true }); // Create directory if it doesn't exist
+    console.log("Receipt directory created:", receiptDirectory);
+  }
+
   const doc = new PDFDocument();
   doc.pipe(fs.createWriteStream(receiptFilePath));
 
@@ -156,6 +179,8 @@ function generateReceiptPDF({ txRef, amount, teleconsultation, receiptFilePath }
   doc.text('Thank you for using our service.', { align: 'center' });
 
   doc.end();
+
+  console.log("Receipt PDF generated successfully.");
 }
 
 // Nodemailer email sender function
