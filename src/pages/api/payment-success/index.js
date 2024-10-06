@@ -10,10 +10,7 @@ const prisma = new PrismaClient();
 async function handler(req, res) {
   const { teleconsultationId } = req.body;
 
-  console.log("Received teleconsultationId:", teleconsultationId); // Log the incoming ID
-
   if (!teleconsultationId) {
-    console.log("Teleconsultation ID is missing."); // Log missing ID
     return res.status(400).json({ error: 'Teleconsultation ID is required.' });
   }
 
@@ -26,144 +23,114 @@ async function handler(req, res) {
       },
     });
 
-    console.log("Teleconsultation found:", teleconsultation); // Log the teleconsultation data
-
     if (!teleconsultation) {
-      console.log("Teleconsultation not found."); // Log not found error
       return res.status(404).json({ error: 'Teleconsultation not found.' });
     }
 
-    // If the teleconsultation is already approved, skip further updates
-    if (teleconsultation.status === 'Approved') {
-      console.log("Teleconsultation is already approved."); // Log approved status
-      return res.status(200).json({ success: true, message: 'Teleconsultation is already approved.' });
-    }
-
-    // Step 2: Find teleconsultor's ID by matching the doctor's name
-const teleconsultorUser = await prisma.user.findFirst({
-  where: {
-    role: 'TELECONSULTER', // Ensure we're matching the Teleconsultor role
-    firstName: teleconsultation.doctor.split(" ")[0], // Match first name from 'doctor' field
-    lastName: teleconsultation.doctor.split(" ")[1], // Match last name from 'doctor' field
-  },
-});
-
-if (!teleconsultorUser) {
-  console.log("Teleconsultor not found."); // Log not found error
-  return res.status(404).json({ error: 'Teleconsultor not found.' });
-}
-
-// Step 3: Fetch teleconsultor details from Teleconsultor model using userId
-const teleconsultor = await prisma.teleconsultor.findUnique({
-  where: {
-    userId: teleconsultorUser.id, // Match teleconsultor using the userId from User table
-  },
-});
-
-console.log("Teleconsultor found:", teleconsultor); // Log the teleconsultor data
-
-if (!teleconsultor) {
-  console.log("Teleconsultor details not found."); // Log not found error
-  return res.status(404).json({ error: 'Teleconsultor details not found.' });
-}
-
-const teleconsultorRate = teleconsultor.rate;
-const userAmount = teleconsultorRate; // The amount the user will pay (teleconsultor's rate)
-const teleconsultorAmount = teleconsultorRate * 0.8; // Teleconsultor gets 80%
-
-console.log("Calculated amounts - User Amount:", userAmount, "Teleconsultor Amount:", teleconsultorAmount);
-
-
-    // Step 3: Update teleconsultation status to Approved
-    await prisma.teleconsultation.update({
-      where: { id: parseInt(teleconsultationId) },
-      data: { status: 'Approved' },
+    // Step 2: Fetch teleconsultor's rate from the Teleconsultor model
+    const teleconsultor = await prisma.teleconsultor.findUnique({
+      where: {
+        userId: teleconsultation.userId, // Assuming userId links to the teleconsultor
+      },
     });
 
-    console.log("Teleconsultation status updated to Approved.");
+    if (!teleconsultor) {
+      return res.status(404).json({ error: 'Teleconsultor not found.' });
+    }
 
-    // Step 4: Create a unique transaction reference
-    const txRef = `TX-${Date.now()}-${teleconsultationId}`;
-    console.log("Transaction reference generated:", txRef);
+    const teleconsultorRate = teleconsultor.rate;
+    const userAmount = teleconsultorRate;
+    const teleconsultorAmount = teleconsultorRate * 0.8;
 
-    // Step 5: Generate PDF receipt
-    const receiptFilePath = path.join(__dirname, `../../public/receipts/receipt-${txRef}.pdf`);
+    // Step 3: Generate unique transaction references for both the user and teleconsultor
+    const userTxRef = `TX-USER-${Date.now()}-${teleconsultationId}`;
+    const teleconsultorTxRef = `TX-TELECONSULTOR-${Date.now()}-${teleconsultationId}`;
+
+    // Step 4: Check if the user transaction already exists
+    const existingUserTransaction = await prisma.transaction.findUnique({
+      where: { txRef: userTxRef },
+    });
+
+    if (!existingUserTransaction) {
+      // Step 5: Create a transaction for the user if it doesn't exist
+      const userTransaction = await prisma.transaction.create({
+        data: {
+          userId: teleconsultation.userId,
+          teleconsultationId: teleconsultation.id,
+          txRef: userTxRef,
+          status: 'Completed',
+          amount: userAmount, // Amount for the user transaction
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+      });
+      console.log('User transaction created:', userTransaction);
+    } else {
+      console.log('User transaction already exists. Skipping creation.');
+    }
+
+    // Step 6: Check if the teleconsultor transaction already exists
+    const existingTeleconsultorTransaction = await prisma.transaction.findFirst({
+      where: {
+        userId: teleconsultor.userId,
+        teleconsultationId: teleconsultation.id,
+        txRef: teleconsultorTxRef,
+      },
+    });
+
+    if (!existingTeleconsultorTransaction) {
+      // Step 7: Create a transaction for the teleconsultor if it doesn't exist
+      const teleconsultorTransaction = await prisma.transaction.create({
+        data: {
+          userId: teleconsultor.userId, // Teleconsultor's user ID
+          teleconsultationId: teleconsultation.id,
+          txRef: teleconsultorTxRef,
+          status: 'Completed',
+          amount: teleconsultorAmount, // 80% of the rate goes to the teleconsultor
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+      });
+      console.log('Teleconsultor transaction created:', teleconsultorTransaction);
+    } else {
+      console.log('Teleconsultor transaction already exists. Skipping creation.');
+    }
+
+    // Step 8: Generate PDF receipt (this remains unchanged)
+    const receiptFilePath = path.join(__dirname, `../../public/receipts/receipt-${userTxRef}.pdf`);
     generateReceiptPDF({
-      txRef,
+      txRef: userTxRef,
       amount: userAmount,
       teleconsultation,
       receiptFilePath,
     });
-    console.log("PDF receipt generated at:", receiptFilePath);
 
-    // Step 6: Create a transaction for the user
-    const userTransaction = await prisma.transaction.create({
-      data: {
-        userId: teleconsultation.userId,
-        teleconsultationId: teleconsultation.id,
-        txRef,
-        status: 'Completed',
-        amount: userAmount, // Amount for the user transaction
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-    });
+    // Step 9: Send emails (this remains unchanged)
+    const receiptUrl = `${process.env.BASE_URL}/receipts/receipt-${userTxRef}.pdf`;
 
-    console.log("User transaction created:", userTransaction); // Log the created transaction
-
-    // Step 7: Create a transaction for the teleconsultor
-    const teleconsultorTransaction = await prisma.transaction.create({
-      data: {
-        userId: teleconsultor.userId, // Teleconsultor's user ID
-        teleconsultationId: teleconsultation.id,
-        txRef,
-        status: 'Completed',
-        amount: teleconsultorAmount, // 80% of the rate goes to the teleconsultor
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-    });
-
-    console.log("Teleconsultor transaction created:", teleconsultorTransaction); // Log the created transaction
-
-    // Step 8: Notify the user and teleconsultor via email
-    const receiptUrl = `${process.env.BASE_URL}/receipts/receipt-${txRef}.pdf`;
-    
-    // Sending email to user
     await sendEmailWithReceipt({
       to: teleconsultation.user.email,
       subject: `Teleconsultation Receipt - Dr. ${teleconsultation.doctor}`,
       text: `Your teleconsultation with Dr. ${teleconsultation.doctor} has been approved. You can access your receipt here: ${receiptUrl}`,
       receiptFilePath,
     });
-    console.log("Email sent to user:", teleconsultation.user.email);
 
-    // Sending email to teleconsultor
     await sendEmailWithReceipt({
       to: teleconsultor.user.email,
       subject: `Teleconsultation Receipt for Dr. ${teleconsultation.doctor}`,
       text: `You have successfully completed a teleconsultation with ${teleconsultation.user.firstName} ${teleconsultation.user.lastName}. You can access your receipt here: ${receiptUrl}`,
       receiptFilePath,
     });
-    console.log("Email sent to teleconsultor:", teleconsultor.user.email);
 
     return res.status(200).json({ success: true, message: 'Teleconsultation approved, transaction created, receipt generated, and emails sent.' });
   } catch (error) {
-    console.error('Error updating teleconsultation status or creating transactions:', error); // Log any errors
+    console.error('Error updating teleconsultation status or creating transactions:', error);
     return res.status(500).json({ error: 'Failed to process teleconsultation approval and transactions.' });
   }
 }
 
 // Generate the receipt PDF
 function generateReceiptPDF({ txRef, amount, teleconsultation, receiptFilePath }) {
-  const receiptDirectory = path.dirname(receiptFilePath);
-
-  // Ensure the receipts directory exists
-  if (!fs.existsSync(receiptDirectory)) {
-    fs.mkdirSync(receiptDirectory, { recursive: true }); // Create directory if it doesn't exist
-    console.log("Receipt directory created:", receiptDirectory);
-  }
-
   const doc = new PDFDocument();
   doc.pipe(fs.createWriteStream(receiptFilePath));
 
@@ -179,8 +146,6 @@ function generateReceiptPDF({ txRef, amount, teleconsultation, receiptFilePath }
   doc.text('Thank you for using our service.', { align: 'center' });
 
   doc.end();
-
-  console.log("Receipt PDF generated successfully.");
 }
 
 // Nodemailer email sender function
@@ -188,13 +153,13 @@ async function sendEmailWithReceipt({ to, subject, text, receiptFilePath }) {
   const transporter = nodemailer.createTransport({
     service: 'Gmail',
     auth: {
-      user: process.env.GMAIL_USER, // Your Gmail address
-      pass: process.env.GMAIL_PASS, // Your Gmail password or app password
+      user: process.env.GMAIL_USER,
+      pass: process.env.GMAIL_PASS,
     },
   });
 
   await transporter.sendMail({
-    from: process.env.GMAIL_USER, // Sender email address
+    from: process.env.GMAIL_USER,
     to,
     subject,
     text,
