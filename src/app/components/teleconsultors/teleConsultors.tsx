@@ -3,12 +3,14 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css'; // Import the skeleton CSS
+import { AiFillStar, AiOutlineStar } from "react-icons/ai"; // Importing star icons
 
 interface Teleconsultor {
   id: number;
   firstName: string;
   lastName: string;
   rate: number;
+  rating: number; // Add rating to the interface
 }
 
 const TeleconsultorsList = () => {
@@ -41,6 +43,30 @@ const TeleconsultorsList = () => {
     router.push(`/teleconsultors/${id}/book`); // Navigate to the booking page
   };
 
+  const renderStars = (rating: number) => {
+    const totalStars = 5;
+    const validRating = Math.max(0, Math.min(rating, totalStars)); // Ensure rating is between 0 and totalStars
+    const filledStars = Math.floor(validRating);
+    const halfStar = validRating % 1 !== 0;
+    const emptyStars = totalStars - filledStars - (halfStar ? 1 : 0);
+
+    return (
+      <div className="flex items-center">
+        {Array(filledStars)
+          .fill(0)
+          .map((_, i) => (
+            <AiFillStar key={`filled-${i}`} className="text-yellow-500" />
+          ))}
+        {halfStar && <AiFillStar className="text-yellow-500" />}
+        {Array(emptyStars)
+          .fill(0)
+          .map((_, i) => (
+            <AiOutlineStar key={`empty-${i}`} className="text-yellow-500" />
+          ))}
+      </div>
+    );
+  };
+
   if (error) return <p className="text-red-500">{error}</p>;
 
   return (
@@ -55,6 +81,7 @@ const TeleconsultorsList = () => {
               <div key={i} className="p-6 bg-white shadow-md rounded-md">
                 <Skeleton height={30} width={150} /> {/* Skeleton for the name */}
                 <Skeleton height={20} width={100} className="mt-2" /> {/* Skeleton for the rate */}
+                <Skeleton height={20} width={100} className="mt-2" /> {/* Skeleton for the rating */}
                 <Skeleton height={40} width={100} className="mt-4" /> {/* Skeleton for the button */}
               </div>
             ))
@@ -65,6 +92,10 @@ const TeleconsultorsList = () => {
                 Dr. {teleconsultor.firstName} {teleconsultor.lastName}
               </h2>
               <p>Rate: ${teleconsultor.rate}</p>
+              <div className="flex items-center">
+                {renderStars(teleconsultor.rating)}
+                <span className="ml-2">{teleconsultor.rating.toFixed(1)}</span> {/* Display the numeric rating */}
+              </div>
               <button
                 className="mt-4 bg-blue-600 text-white py-2 px-4 rounded"
                 onClick={() => handleBookNow(teleconsultor.id)} // Pass teleconsultorId

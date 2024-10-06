@@ -5,17 +5,22 @@ const prisma = new PrismaClient();
 async function handler(req, res) {
   if (req.method === 'GET') {
     try {
-      // Fetch all teleconsultors with their names and rates
+      // Fetch all teleconsultors with their names, rates, and ratings
       const teleconsultors = await prisma.user.findMany({
         where: {
           role: 'TELECONSULTER',
-          status: 'APPROVED', 
+          status: 'APPROVED',
         },
         select: {
           id: true,
           firstName: true,
           lastName: true,
-          rate: true,
+          teleconsultor: {
+            select: {
+              rate: true,
+              rating: true,
+            },
+          },
         },
       });
 
