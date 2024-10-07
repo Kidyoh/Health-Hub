@@ -1,4 +1,3 @@
-// /app/pages/teleconsultor/consultations/ConsultationDashboard.tsx
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -16,7 +15,8 @@ const ConsultationDashboard: React.FC<ConsultationDashboardProps> = ({ consultat
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [notes, setNotes] = useState<string>(""); // For adding notes
-  const [prescription, setPrescription] = useState<string>(""); // For adding prescriptions
+  const [medicines, setMedicines] = useState<string>(""); // For adding medicines
+  const [dosage, setDosage] = useState<string>(""); // For adding dosage
 
   useEffect(() => {
     const fetchSessionUrl = async () => {
@@ -38,10 +38,14 @@ const ConsultationDashboard: React.FC<ConsultationDashboardProps> = ({ consultat
 
   const endSession = async () => {
     try {
-      await axios.post(`/api/teleconsultors/consultations/${consultationId}/end-session`, { notes, prescription });
+      await axios.post(`/api/teleconsultation/${consultationId}/end-session`, { 
+        notes, 
+        medicines, 
+        dosage 
+      });
       setIsModalOpen(false);
       alert("Session has ended successfully.");
-      onClose(); // Close the dashboard
+      onClose(); // Close the modal
     } catch (err) {
       console.error("Failed to end the session:", err);
       setError("Failed to end the session.");
@@ -80,9 +84,15 @@ const ConsultationDashboard: React.FC<ConsultationDashboardProps> = ({ consultat
             />
             <textarea
               className="w-full p-2 border rounded mt-4"
-              placeholder="Enter prescription"
-              value={prescription}
-              onChange={(e) => setPrescription(e.target.value)}
+              placeholder="Enter medicines"
+              value={medicines}
+              onChange={(e) => setMedicines(e.target.value)}
+            />
+            <textarea
+              className="w-full p-2 border rounded mt-4"
+              placeholder="Enter dosage"
+              value={dosage}
+              onChange={(e) => setDosage(e.target.value)}
             />
             <Button onClick={endSession} color="failure">
               End Session
