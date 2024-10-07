@@ -1,24 +1,22 @@
 import { PrismaClient } from '@prisma/client';
 import { withIronSession } from 'next-iron-session';
-import nodemailer from 'nodemailer'; // Make sure you have nodemailer installed
+import nodemailer from 'nodemailer';
 
 const prisma = new PrismaClient();
 
 async function handler(req, res) {
   const session = req.session.get('user');
 
-  // Ensure the user is logged in and is an admin
   if (!session || session.role !== 'ADMIN') {
     return res.status(403).json({ error: 'Forbidden' });
   }
 
-  // Handle GET request to fetch all tickets
   if (req.method === 'GET') {
     try {
       const tickets = await prisma.supportTicket.findMany({
         include: {
           user: {
-            select: { firstName: true, lastName: true, email: true }, // Include user details for tickets
+            select: { firstName: true, lastName: true, email: true },
           },
         },
       });
@@ -30,9 +28,8 @@ async function handler(req, res) {
     }
   }
 
-  // Handle PATCH request to update ticket status
   if (req.method === 'PATCH') {
-    const { id, status } = req.body;
+    const { id, status, message } = req.body;
 
     try {
       // Update the ticket status
@@ -41,17 +38,33 @@ async function handler(req, res) {
         data: { status },
         include: {
           user: {
-            select: { firstName: true, lastName: true, email: true }, // Fetch user details for the email
+            select: { firstName: true, lastName: true, email: true },
           },
         },
       });
 
-      // Send email notification to the user about the status update
-      await sendEmail(
-        updatedTicket.user.email, // The user's email
-        'Support Ticket Status Updated',
-        `Dear ${updatedTicket.user.firstName} ${updatedTicket.user.lastName},\n\nYour support ticket titled "${updatedTicket.title}" has been updated to: ${status}.\n\nBest Regards,\nSupport Team`
-      );
+      // Prepare a custom email message based on status
+      let emailMessage = `Dear ${updatedTicket.user.firstName} ${updatedTicket.user.lastName},\n\n`;
+      switch (status) {
+        case 'Resolved':
+          emailMessage += `Good news! Your support ticket titled "${updatedTicket.title}" has been resolved. If you need further assistance, feel free to reply to this email.\n\n`;
+          break;
+        case 'Closed':
+          emailMessage += `Your support ticket titled "${updatedTicket.title}" has been closed. If you have any other issues, please don't hesitate to reach out.\n\n`;
+          break;
+        default:
+          emailMessage += `Your support ticket titled "${updatedTicket.title}" has been updated to: ${status}.\n\n`;
+      }
+
+      // Append any custom message the admin wants to include
+      if (message) {
+        emailMessage += `Message from the admin: ${message}\n\n`;
+      }
+
+      emailMessage += `Best regards,\nSupport Team`;
+
+      // Send email notification to the user
+      await sendEmail(updatedTicket.user.email, 'Support Ticket Status Updated', emailMessage);
 
       return res.status(200).json({ success: true, ticket: updatedTicket });
     } catch (error) {
@@ -60,29 +73,28 @@ async function handler(req, res) {
     }
   }
 
-  // Return 405 for other methods
   return res.status(405).json({ error: 'Method not allowed' });
 }
 
 // Utility function to send an email using Nodemailer
 const sendEmail = async (to, subject, text) => {
   const transporter = nodemailer.createTransport({
-    service: 'Gmail', // You can configure this to any service (Gmail, SMTP, etc.)
+    service: 'Gmail',
     auth: {
-      user: process.env.GMAIL_USER, // Use your environment variables
+      user: process.env.GMAIL_USER,
       pass: process.env.GMAIL_PASS,
     },
   });
 
   const mailOptions = {
-    from: process.env.GMAIL_USER, // Sender's email address
-    to, // Receiver's email
-    subject, // Subject of the email
-    text, // Email content (plain text)
+    from: process.env.GMAIL_USER,
+    to,
+    subject,
+    text,
   };
 
   try {
-    await transporter.sendMail(mailOptions); // Send email
+    await transporter.sendMail(mailOptions);
     console.log('Email sent successfully');
   } catch (error) {
     console.error('Error sending email:', error);
