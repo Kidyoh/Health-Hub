@@ -303,18 +303,18 @@ const SidebarContent = {
           id: uniqueId(),
           url: "/admin/reports/financial",
         },
-        {
-          name: "User Activity Reports",
-          icon: "solar:activity-outline",
-          id: uniqueId(),
-          url: "/admin/reports/activity",
-        },
-        {
-          name: "Consultation Reports",
-          icon: "solar:report-outline",
-          id: uniqueId(),
-          url: "/admin/reports/consultations",
-        },
+        // {
+        //   name: "User Activity Reports",
+        //   icon: "solar:activity-outline",
+        //   id: uniqueId(),
+        //   url: "/admin/reports/activity",
+        // },
+        // {
+        //   name: "Consultation Reports",
+        //   icon: "solar:report-outline",
+        //   id: uniqueId(),
+        //   url: "/admin/reports/consultations",
+        // },
         {
           name: "System Logs",
           icon: "solar:logs-outline",
