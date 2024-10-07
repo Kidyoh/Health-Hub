@@ -290,7 +290,7 @@ const SidebarContent = {
           name: "Teleconsultor Management",
           icon: "solar:call-outline",
           id: uniqueId(),
-          url: "/teleconsultor-management",
+          url: "/admin/teleconsultors",
         },
       ],
     },
