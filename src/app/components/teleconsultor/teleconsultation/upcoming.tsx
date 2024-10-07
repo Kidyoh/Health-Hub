@@ -1,4 +1,3 @@
-// /app/pages/teleconsultor/teleconsultations/upcoming.tsx
 "use client";
 import { useEffect, useState } from "react";
 import axios from "axios";
@@ -7,7 +6,6 @@ interface Consultation {
   id: number;
   patientName: string;
   date: string;
-  time: string;
   status: string;
 }
 
@@ -20,13 +18,21 @@ const UpcomingConsultations = () => {
     const fetchUpcomingConsultations = async () => {
       try {
         const response = await axios.get("/api/teleconsultors/consultations/upcoming");
+
+        // Log the response data for debugging
+        console.log("API Response:", response.data);
+
+        // Set consultations state
         setConsultations(response.data.consultations);
+
       } catch (error) {
+        console.error("Error fetching consultations:", error); // Log any errors
         setError("Failed to fetch consultations.");
       } finally {
         setLoading(false);
       }
     };
+
     fetchUpcomingConsultations();
   }, []);
 
@@ -44,7 +50,6 @@ const UpcomingConsultations = () => {
             <li key={consultation.id} className="border p-4 mb-4 rounded">
               <p>Patient: {consultation.patientName}</p>
               <p>Date: {consultation.date}</p>
-              <p>Time: {consultation.time}</p>
               <p>Status: {consultation.status}</p>
             </li>
           ))}
