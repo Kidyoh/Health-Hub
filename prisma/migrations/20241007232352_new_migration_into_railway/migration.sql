@@ -5,7 +5,10 @@
 
 */
 -- AlterTable
-ALTER TABLE `prescription` ADD COLUMN `teleconsultationId` INTEGER NOT NULL;
+ALTER TABLE `HealthcareFacility` ADD COLUMN `appointmentPrice` DOUBLE NULL;
+
+-- AlterTable
+ALTER TABLE `Prescription` ADD COLUMN `teleconsultationId` INTEGER NOT NULL;
 
 -- CreateIndex
 CREATE INDEX `Prescription_teleconsultationId_idx` ON `Prescription`(`teleconsultationId`);
