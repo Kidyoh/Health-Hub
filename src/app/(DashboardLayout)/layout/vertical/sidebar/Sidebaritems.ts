@@ -353,7 +353,7 @@ const SidebarContent = {
           name: "Admin Support",
           icon: "solar:help-outline",
           id: uniqueId(),
-          url: "/admin-support",
+          url: "/admin/support/ticket",
         },
         {
           name: "Issue Tracker",
