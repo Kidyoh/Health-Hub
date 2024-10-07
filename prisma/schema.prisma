@@ -128,6 +128,8 @@ model Teleconsultor {
 
   user User @relation(fields: [userId], references: [id])
   feedbacks Feedback[]
+
+  Teleconsultation Teleconsultation[]
 }
 
 
@@ -226,22 +228,26 @@ model Teleconsultation {
   id            Int           @id @default(autoincrement())
   date          DateTime
   userId        Int
+  teleconsultorId Int         // Link to Teleconsultor
   doctor        String
-  status        String // e.g., Pending, Approved, In Progress, Completed
-  sessionUrl    String? // URL for video consultation session
+  status        String        // e.g., Pending, Approved, In Progress, Completed
+  sessionUrl    String?       // URL for video consultation session
   paymentStatus String        @default("Pending")
-  notes         String? // New: Doctor's notes
+  notes         String?       // New: Doctor's notes
   transactions  Transaction[]
   appointments  Appointment[]
-  feedback      Feedback[] // Feedback given for the teleconsultation
+  feedback      Feedback[]    // Feedback given for the teleconsultation
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @default(now())
 
-  user User @relation(fields: [userId], references: [id])
+  user          User          @relation(fields: [userId], references: [id])
+  teleconsultor Teleconsultor @relation(fields: [teleconsultorId], references: [id])  // Added relation to Teleconsultor
 
   @@index([userId])
+  @@index([teleconsultorId])  // Add index on teleconsultorId
   Diagnosis Diagnosis[]
 }
+
 
 model Feedback {
   id                 Int      @id @default(autoincrement())

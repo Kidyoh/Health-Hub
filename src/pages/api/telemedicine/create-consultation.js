@@ -14,26 +14,30 @@ async function handler(req, res) {
   if (!gateway || !teleconsultorId || !date) return res.status(400).json({ error: 'Missing required fields' });
 
   try {
+    // Check if teleconsultor exists
     const teleconsultor = await prisma.teleconsultor.findUnique({
       where: { id: parseInt(teleconsultorId, 10) },
       include: { user: true },
     });
     if (!teleconsultor) return res.status(404).json({ error: 'Teleconsultor not found' });
 
+    // Create a teleconsultation
     const teleconsultation = await prisma.teleconsultation.create({
       data: {
-        userId: session.id,
+        userId: session.id, // session user ID
+        teleconsultorId: teleconsultor.id, // teleconsultor ID
         doctor: `${teleconsultor.user.firstName} ${teleconsultor.user.lastName}`,
         date: new Date(date),
         status: 'Pending Payment',
       },
     });
 
+    // Create the appointment after teleconsultation is initialized
     const appointment = await prisma.appointment.create({
       data: {
         date: new Date(date),
         userId: session.id,
-        teleconsultationId: teleconsultation.id,
+        teleconsultationId: teleconsultation.id, // Link to teleconsultation
         facilityId: facilityId ? parseInt(facilityId, 10) : null,
         status: 'Pending',
       },
@@ -42,6 +46,7 @@ async function handler(req, res) {
     let paymentUrl;
 
     if (gateway === 'stripe') {
+      // Create a Stripe checkout session
       const stripeSession = await stripe.checkout.sessions.create({
         payment_method_types: ['card'],
         line_items: [
@@ -51,7 +56,7 @@ async function handler(req, res) {
               product_data: {
                 name: `Consultation with ${teleconsultor.user.firstName}`,
               },
-              unit_amount: teleconsultor.rate * 100,
+              unit_amount: Math.round(teleconsultor.rate * 100), // Ensure rate is in cents
             },
             quantity: 1,
           },
@@ -66,12 +71,13 @@ async function handler(req, res) {
       });
       paymentUrl = stripeSession.url;
     } else if (gateway === 'chapa') {
+      // Chapa payment initialization
       const chapaResponse = await axios.post(
         'https://api.chapa.co/v1/transaction/initialize',
         {
-          amount: teleconsultor.rate,
+          amount: teleconsultor.rate, // Teleconsultor's rate
           currency: 'ETB',
-          email: session.email,
+          email: session.email, // User's email from session
           tx_ref: `tx-${teleconsultation.id}`,
           callback_url: `${process.env.NEXT_PUBLIC_URL}/user/payment-success?teleconsultationId=${teleconsultation.id}&appointmentId=${appointment.id}`,
           return_url: `${process.env.NEXT_PUBLIC_URL}/user/payment-success?teleconsultationId=${teleconsultation.id}&appointmentId=${appointment.id}`,
@@ -85,7 +91,13 @@ async function handler(req, res) {
       paymentUrl = chapaResponse.data.data.checkout_url;
     }
 
-    return res.status(201).json({ success: true, paymentUrl, appointmentId: appointment.id, teleconsultationId: teleconsultation.id });
+    // Return success with the payment URL
+    return res.status(201).json({
+      success: true,
+      paymentUrl,
+      appointmentId: appointment.id,
+      teleconsultationId: teleconsultation.id,
+    });
   } catch (error) {
     console.error('Error creating consultation or initiating payment:', error);
     return res.status(500).json({ error: 'Failed to create consultation or initiate payment.' });

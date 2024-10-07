@@ -23,6 +23,7 @@ async function handler(req, res) {
       where: { id: parseInt(teleconsultationId) },
       include: {
         user: true, // Get the user associated with the teleconsultation
+        teleconsultor: { include: { user: true } }, // Get teleconsultor and linked user details
       },
     });
 
@@ -39,29 +40,8 @@ async function handler(req, res) {
       return res.status(200).json({ success: true, message: 'Teleconsultation is already approved.' });
     }
 
-    // Step 2: Find teleconsultor's ID by matching the doctor's name
-    const teleconsultorUser = await prisma.user.findFirst({
-      where: {
-        role: 'TELECONSULTER', // Ensure we're matching the Teleconsultor role
-        firstName: teleconsultation.doctor.split(" ")[0], // Match first name from 'doctor' field
-        lastName: teleconsultation.doctor.split(" ")[1], // Match last name from 'doctor' field
-      },
-    });
-
-    if (!teleconsultorUser) {
-      console.log("Teleconsultor not found."); // Log not found error
-      return res.status(404).json({ error: 'Teleconsultor not found.' });
-    }
-
-    // Step 3: Fetch teleconsultor details from Teleconsultor model using userId
-    const teleconsultor = await prisma.teleconsultor.findUnique({
-      where: {
-        userId: teleconsultorUser.id, // Match teleconsultor using the userId from User table
-      },
-    });
-
-    console.log("Teleconsultor found:", teleconsultor); // Log the teleconsultor data
-
+    // Step 2: Check if the teleconsultor exists
+    const teleconsultor = teleconsultation.teleconsultor;
     if (!teleconsultor) {
       console.log("Teleconsultor details not found."); // Log not found error
       return res.status(404).json({ error: 'Teleconsultor details not found.' });
@@ -74,7 +54,7 @@ async function handler(req, res) {
 
     console.log("Calculated amounts - User Amount:", userAmount, "Teleconsultor Amount:", teleconsultorAmount, "Admin Amount:", adminAmount);
 
-    // Step 4: Update teleconsultation status to Approved
+    // Step 3: Update teleconsultation status to Approved
     await prisma.teleconsultation.update({
       where: { id: parseInt(teleconsultationId) },
       data: { status: 'Approved' },
@@ -82,13 +62,13 @@ async function handler(req, res) {
 
     console.log("Teleconsultation status updated to Approved.");
 
-    // Step 5: Create unique transaction references
+    // Step 4: Create unique transaction references
     const userTxRef = `TX-USER-${Date.now()}-${teleconsultationId}`;
     const teleconsultorTxRef = `TX-TELECONSULTOR-${Date.now()}-${teleconsultationId}`;
     const adminTxRef = `TX-ADMIN-${Date.now()}-${teleconsultationId}`;
     console.log("Transaction references generated:", { userTxRef, teleconsultorTxRef, adminTxRef });
 
-    // Step 6: Generate PDF receipt
+    // Step 5: Generate PDF receipt
     const receiptFilePath = generateReceiptPDF({
       txRef: userTxRef,
       amount: userAmount,
@@ -96,7 +76,7 @@ async function handler(req, res) {
     });
     console.log("PDF receipt generated at:", receiptFilePath);
 
-    // Step 7: Create a transaction for the user
+    // Step 6: Create a transaction for the user
     const userTransaction = await prisma.transaction.create({
       data: {
         userId: teleconsultation.userId,
@@ -111,7 +91,7 @@ async function handler(req, res) {
 
     console.log("User transaction created:", userTransaction); // Log the created transaction
 
-    // Step 8: Create a transaction for the teleconsultor
+    // Step 7: Create a transaction for the teleconsultor
     const teleconsultorTransaction = await prisma.transaction.create({
       data: {
         userId: teleconsultor.userId, // Teleconsultor's user ID
@@ -126,7 +106,7 @@ async function handler(req, res) {
 
     console.log("Teleconsultor transaction created:", teleconsultorTransaction); // Log the created transaction
 
-    // Step 9: Create a transaction for the admin (deduction)
+    // Step 8: Create a transaction for the admin (deduction)
     const adminUser = await prisma.user.findFirst({
       where: { role: 'ADMIN' }, // Assuming there is an admin in the system
     });
@@ -145,7 +125,7 @@ async function handler(req, res) {
 
     console.log("Admin transaction created:", adminTransaction); // Log the created transaction
 
-    // Step 10: Notify the user and teleconsultor via email
+    // Step 9: Notify the user and teleconsultor via email
     const receiptUrl = `${process.env.BASE_URL}/receipts/receipt-${userTxRef}.pdf`;
 
     // Sending email to user
@@ -159,12 +139,12 @@ async function handler(req, res) {
 
     // Sending email to teleconsultor
     await sendEmailWithReceipt({
-      to: teleconsultorUser.email,
+      to: teleconsultor.user.email,
       subject: `Teleconsultation Receipt for Dr. ${teleconsultation.doctor}`,
       text: `You have successfully completed a teleconsultation with ${teleconsultation.user.firstName} ${teleconsultation.user.lastName}. You can access your receipt here: ${receiptUrl}`,
       receiptFilePath,
     });
-    console.log("Email sent to teleconsultor:", teleconsultorUser.email);
+    console.log("Email sent to teleconsultor:", teleconsultor.user.email);
 
     return res.status(200).json({ success: true, message: 'Teleconsultation approved, transactions created, receipt generated, and emails sent.' });
   } catch (error) {
@@ -175,23 +155,18 @@ async function handler(req, res) {
 
 // Generate the receipt PDF
 function generateReceiptPDF({ txRef, amount, teleconsultation }) {
-  // Construct an absolute path to the public/receipts directory
   const receiptDirectory = path.resolve('./public/receipts');
-
-  // Ensure the receipts directory exists
   if (!fs.existsSync(receiptDirectory)) {
-    fs.mkdirSync(receiptDirectory, { recursive: true }); // Create directory if it doesn't exist
+    fs.mkdirSync(receiptDirectory, { recursive: true });
     console.log("Receipt directory created:", receiptDirectory);
   }
 
-  // Build the absolute path to the receipt file
   const receiptFile = path.join(receiptDirectory, `receipt-${txRef}.pdf`);
 
   const doc = new PDFDocument();
   doc.pipe(fs.createWriteStream(receiptFile));
 
   doc.fontSize(25).text('Teleconsultation Receipt', { align: 'center' });
-
   doc.fontSize(14).text(`Transaction Reference: ${txRef}`, { align: 'left' });
   doc.text(`Amount: $${amount}`, { align: 'left' });
   doc.text(`Doctor: Dr. ${teleconsultation.doctor}`, { align: 'left' });
@@ -210,12 +185,10 @@ function generateReceiptPDF({ txRef, amount, teleconsultation }) {
 
 // Nodemailer email sender function
 async function sendEmailWithReceipt({ to, subject, text, receiptFilePath }) {
-  console.log(process.env.GMAIL_USER, process.env.GMAIL_PASS);  // Make sure this logs the correct credentials
-
   const transporter = nodemailer.createTransport({
     service: 'Gmail',
     auth: {
-      user: process.env.GMAIL_USER, 
+      user: process.env.GMAIL_USER,
       pass: process.env.GMAIL_PASS,
     },
   });

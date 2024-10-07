@@ -7,42 +7,51 @@ const prisma = new PrismaClient();
 async function handler(req, res) {
   const session = req.session.get('user');
 
-  // Ensure the user is logged in and is a teleconsultor
+  // Check if the user is logged in and is a teleconsultor
   if (!session || session.role !== 'TELECONSULTER') {
     return res.status(403).json({ error: 'Forbidden' });
   }
 
   try {
-    // Find the teleconsultor record by user ID (session.id)
+    // Find the teleconsultor by userId (from session)
     const teleconsultor = await prisma.teleconsultor.findUnique({
-      where: { userId: session.id },
+      where: { userId: session.id }, // Match by session user ID
     });
 
     if (!teleconsultor) {
       return res.status(404).json({ error: 'Teleconsultor not found' });
     }
 
-    // Fetch upcoming consultations linked with the teleconsultorId
+    // Fetch upcoming consultations where teleconsultorId matches and status is 'Upcoming'
     const consultations = await prisma.teleconsultation.findMany({
       where: {
-        teleconsultorId: teleconsultor.id, // Link by teleconsultorId
-        status: 'Upcoming', // Only fetch upcoming consultations
+        teleconsultorId: teleconsultor.id, // Match consultations by teleconsultorId
+        status: 'Approved', // Only get upcoming consultations
       },
       include: {
-        user: true, // Include user details (patient details)
+        user: {
+          select: {
+            firstName: true,
+            lastName: true,
+            email: true, // Fetch essential details of the patient (user)
+          },
+        },
       },
     });
 
-    // Return consultations with necessary details
+    // Map consultations to include only necessary details for response
+    const consultationDetails = consultations.map((consultation) => ({
+      id: consultation.id,
+      patientName: `${consultation.user.firstName} ${consultation.user.lastName}`,
+      email: consultation.user.email, // Include patient's email
+      date: consultation.date,
+      status: consultation.status,
+    }));
+
+    // Return successful response with consultation details
     return res.status(200).json({
       success: true,
-      consultations: consultations.map(c => ({
-        id: c.id,
-        patientName: `${c.user.firstName} ${c.user.lastName}`,
-        date: c.date,
-        time: c.time, // Assuming you have a 'time' field in Teleconsultation model
-        status: c.status,
-      })),
+      consultations: consultationDetails,
     });
   } catch (error) {
     console.error('Error fetching consultations:', error);
