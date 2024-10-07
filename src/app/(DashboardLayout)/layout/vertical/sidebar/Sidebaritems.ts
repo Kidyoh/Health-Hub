@@ -314,13 +314,7 @@ const SidebarContent = {
         //   icon: "solar:report-outline",
         //   id: uniqueId(),
         //   url: "/admin/reports/consultations",
-        // },
-        {
-          name: "System Logs",
-          icon: "solar:logs-outline",
-          id: uniqueId(),
-          url: "/system-logs",
-        },
+        // }
       ],
     },
     {
@@ -356,10 +350,10 @@ const SidebarContent = {
           url: "/admin/support/ticket",
         },
         {
-          name: "Issue Tracker",
+          name: "Help Articles",
           icon: "solar:issue-outline",
           id: uniqueId(),
-          url: "/issue-tracker",
+          url: "/admin/support/articles",
         },
       ],
     },
