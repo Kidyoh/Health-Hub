@@ -7,7 +7,7 @@ const prisma = new PrismaClient();
 async function handler(req, res) {
   const session = req.session.get('user');
   const { id } = req.query;
-  const { notes, prescription } = req.body; // Accept notes and prescription from TELECONSULTER
+  const { notes, medicines, dosage } = req.body; // Accept prescription details from TELECONSULTER
 
   if (!session) {
     return res.status(401).json({ error: 'Unauthorized' });
@@ -27,6 +27,7 @@ async function handler(req, res) {
         return res.status(400).json({ error: 'Consultation already completed.' });
       }
 
+      // Delete the Daily.co room if it exists
       if (consultation.sessionUrl) {
         const roomName = consultation.sessionUrl.split('/').pop();
         await axios.delete(`https://api.daily.co/v1/rooms/${roomName}`, {
@@ -34,14 +35,28 @@ async function handler(req, res) {
         });
       }
 
+      // Update the consultation with prescription, dosage, and notes
       await prisma.teleconsultation.update({
         where: { id: parseInt(id, 10) },
-        data: { status: 'Completed', sessionUrl: null, notes, prescription },
+        data: { 
+          status: 'Completed', 
+          sessionUrl: null, 
+          notes, 
+          prescription: {
+            create: {
+              userId: consultation.userId, // Link to the user
+              doctor: consultation.doctor, // Doctor's name from consultation
+              medicines, // Prescribed medicines
+              dosage,   // Dosage details
+            }
+          }
+        },
       });
 
-      return res.status(200).json({ success: true, message: 'Session ended.' });
+      return res.status(200).json({ success: true, message: 'Session ended and prescription saved.' });
     } catch (error) {
-      return res.status(500).json({ error: 'Failed to end session.' });
+      console.error('Error ending session:', error);
+      return res.status(500).json({ error: 'Failed to end session and save prescription.' });
     }
   } else {
     return res.status(405).json({ error: 'Method not allowed' });
