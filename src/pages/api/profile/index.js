@@ -1,16 +1,21 @@
 import { PrismaClient } from '@prisma/client';
-import { withIronSession } from 'next-iron-session';  // Ensure this is imported
+import { withIronSession } from 'next-iron-session';
 
 const prisma = new PrismaClient();
 
 async function handler(req, res) {
+  console.log('Request received:', req.method, req.url);
+  
   const session = req.session.get('user');
+  console.log('Session:', session);
 
   if (!session) {
+    console.log('Unauthorized access attempt');
     return res.status(401).json({ error: 'Unauthorized' });
   }
 
   const userId = session.id;
+  console.log('User ID:', userId);
 
   if (req.method === 'GET') {
     try {
@@ -22,23 +27,19 @@ async function handler(req, res) {
         prescriptions: true,
       };
 
-      // Add Teleconsultor data if the user is a TELECONSULTER
-      if (session.role === 'TELECONSULTER') {
-        includeData.Teleconsultor = true;
-      }
-
-      // Add HealthcareFacility data if the user is a HEALTHCARE_FACILITY
-      if (session.role === 'HEALTHCARE_FACILITY') {
-        includeData.healthcareFacility = true;
-      }
-
-      // Fetch the user profile
+      // Fetch user profile and teleconsultor if applicable
       const user = await prisma.user.findUnique({
         where: { id: userId },
-        include: includeData,
+        include: {
+          ...includeData,
+          // Fetch teleconsultor data only if the user has the TELECONSULTER role
+          Teleconsultor: session.role === 'TELECONSULTER' ? true : false,
+        },
       });
+      console.log('Fetched user:', user);
 
       if (!user) {
+        console.log('User not found for ID:', userId);
         return res.status(404).json({ error: 'User not found' });
       }
 
@@ -55,15 +56,16 @@ async function handler(req, res) {
       lastName,
       location,
       phone,
-      rate,
-      doctorInfo,
-      specialties,
-      workingHours,
+      rate,         // Teleconsultor-specific fields
+      doctorInfo,   // Teleconsultor-specific fields
+      specialties,  // Teleconsultor-specific fields
+      workingHours, // Teleconsultor-specific fields
       services,
       hours,
       contact,
       type,
     } = req.body;
+    console.log('Request body:', req.body);
 
     try {
       // Step 1: Update basic user fields
@@ -76,26 +78,34 @@ async function handler(req, res) {
           phone,
         },
       });
+      console.log('Updated user:', updatedUser);
 
       // Step 2: If the user is a TELECONSULTER, update teleconsultor-related data
       if (session.role === 'TELECONSULTER') {
-        // Ensure `rate` is passed as a float and not a string
-        const parsedRate = rate ? parseFloat(rate) : undefined;
+        const parsedRate = rate ? parseFloat(rate) : undefined; // Ensure rate is a float
 
-        await prisma.teleconsultor.update({
-          where: { userId },
-          data: {
-            rate: parsedRate,  // Make sure the rate is passed as a number
+        const updatedTeleconsultor = await prisma.teleconsultor.upsert({
+          where: { userId }, // Match by userId
+          update: {
+            rate: parsedRate,
+            doctorInfo,
+            specialties,
+            workingHours,
+          },
+          create: {
+            userId,
+            rate: parsedRate,
             doctorInfo,
             specialties,
             workingHours,
           },
         });
+        console.log('Updated teleconsultor:', updatedTeleconsultor);
       }
 
       // Step 3: If the user is a HEALTHCARE_FACILITY, update healthcare facility-related data
       if (session.role === 'HEALTHCARE_FACILITY') {
-        await prisma.healthcareFacility.update({
+        const updatedHealthcareFacility = await prisma.healthcareFacility.update({
           where: { userId },
           data: {
             services,
@@ -105,6 +115,7 @@ async function handler(req, res) {
             type,
           },
         });
+        console.log('Updated healthcare facility:', updatedHealthcareFacility);
       }
 
       return res.status(200).json({ success: true, message: 'Profile updated successfully' });

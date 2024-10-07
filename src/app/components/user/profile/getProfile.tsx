@@ -4,6 +4,11 @@ import { Button, Modal } from "flowbite-react";
 import axios from "axios";
 import ProfileField from "./profileField";
 
+interface TeleconsultorProfile {
+  rate?: number;
+  doctorInfo?: string;
+  specialties?: string;
+}
 
 interface UserProfile {
   firstName?: string;
@@ -12,15 +17,13 @@ interface UserProfile {
   phone?: string;
   role?: string;
   location?: string;
-  rate?: number;
-  doctorInfo?: string;
-  specialties?: string;
+  teleconsultor?: TeleconsultorProfile; // Add teleconsultor as a nested object
 }
 
 const ProfilePage = () => {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
-  const [editField, setEditField] = useState<string | null>(null); // To track which field is being edited
+  const [editField, setEditField] = useState<string | null>(null);
   const [updatedProfile, setUpdatedProfile] = useState<UserProfile | null>(null);
 
   // Fetch the user's profile on component mount
@@ -28,8 +31,17 @@ const ProfilePage = () => {
     const fetchProfile = async () => {
       try {
         const res = await axios.get("/api/profile");
-        setUserProfile(res.data.user);
-        setUpdatedProfile(res.data.user); // Initialize updated profile
+        console.log("Profile data:", res.data.user); // Log API response
+        
+        const user = res.data.user;
+
+        // If the user is a TELECONSULTER, extract the first teleconsultor record
+        if (user.role === "TELECONSULTER" && user.Teleconsultor.length > 0) {
+          user.teleconsultor = user.Teleconsultor[0]; // Set teleconsultor from the array
+        }
+
+        setUserProfile(user);
+        setUpdatedProfile(user); // Initialize updated profile
       } catch (error) {
         console.error("Error fetching profile:", error);
       }
@@ -39,12 +51,24 @@ const ProfilePage = () => {
 
   const handleEditClick = (field: string) => {
     setEditField(field); // Set the current field to edit
-    setModalOpen(true);  // Open the modal
+    setModalOpen(true); // Open the modal
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (updatedProfile) {
-      setUpdatedProfile({ ...updatedProfile, [editField as string]: e.target.value });
+      if (editField && editField.includes("teleconsultor.")) {
+        // Handle nested teleconsultor fields
+        const teleconsultorField = editField.split(".")[1];
+        setUpdatedProfile({
+          ...updatedProfile,
+          teleconsultor: {
+            ...updatedProfile.teleconsultor,
+            [teleconsultorField as keyof TeleconsultorProfile]: e.target.value,
+          },
+        });
+      } else {
+        setUpdatedProfile({ ...updatedProfile, [editField as keyof UserProfile]: e.target.value });
+      }
     }
   };
 
@@ -53,7 +77,7 @@ const ProfilePage = () => {
       await axios.put("/api/profile", updatedProfile);
       setUserProfile(updatedProfile); // Update the profile page
       setModalOpen(false); // Close modal
-      setEditField(null);  // Clear edit field
+      setEditField(null); // Clear edit field
     } catch (error) {
       console.error("Error updating profile:", error);
     }
@@ -93,20 +117,28 @@ const ProfilePage = () => {
               onEdit={() => handleEditClick("phone")}
             />
 
-            {/* Role-Based Display */}
-            {userProfile.role === "TELECONSULTER" && (
+            {/* Role-Based Display for TELECONSULTER */}
+            {userProfile.role === "TELECONSULTER" && userProfile.teleconsultor && (
               <>
                 {/* Profile Row: Rate */}
                 <ProfileField
                   label="Rate"
-                  value={userProfile.rate ? `$${userProfile.rate}` : "N/A"}
-                  onEdit={() => handleEditClick("rate")}
+                  value={userProfile.teleconsultor.rate ? `$${userProfile.teleconsultor.rate}` : "N/A"}
+                  onEdit={() => handleEditClick("teleconsultor.rate")}
                 />
+
                 {/* Profile Row: Specialties */}
                 <ProfileField
                   label="Specialties"
-                  value={userProfile.specialties}
-                  onEdit={() => handleEditClick("specialties")}
+                  value={userProfile.teleconsultor.specialties || "N/A"}
+                  onEdit={() => handleEditClick("teleconsultor.specialties")}
+                />
+
+                {/* Profile Row: Doctor Info */}
+                <ProfileField
+                  label="Doctor Info"
+                  value={userProfile.teleconsultor.doctorInfo || "N/A"}
+                  onEdit={() => handleEditClick("teleconsultor.doctorInfo")}
                 />
               </>
             )}
@@ -124,7 +156,13 @@ const ProfilePage = () => {
         <Modal.Body>
           <input
             className="border p-2 w-full rounded-md"
-            value={updatedProfile ? (updatedProfile[editField as keyof UserProfile] || "") : ""}
+            value={
+              updatedProfile
+                ? editField && editField.includes("teleconsultor.")
+                  ? String(updatedProfile.teleconsultor?.[editField.split(".")[1] as keyof TeleconsultorProfile] || "")
+                  : String(updatedProfile[editField as keyof UserProfile] || "")
+                : ""
+            }
             onChange={handleChange}
           />
         </Modal.Body>
@@ -140,7 +178,5 @@ const ProfilePage = () => {
     </div>
   );
 };
-
-
 
 export default ProfilePage;
