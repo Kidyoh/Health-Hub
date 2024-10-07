@@ -1,10 +1,17 @@
-// /pages/payment-success.tsx
 "use client";
 import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
-const PaymentSuccess = () => {
-  const [loading, setLoading] = useState(true);
+// Define the response type
+interface PaymentSuccessResponse {
+  success: boolean;
+  message?: string;
+}
+
+const PaymentSuccess: React.FC = () => {
+  const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -12,6 +19,15 @@ const PaymentSuccess = () => {
 
   useEffect(() => {
     const verifyPayment = async () => {
+      if (!teleconsultationId) {
+        toast.error('Teleconsultation ID is missing.');
+        setError('Teleconsultation ID is missing.');
+        setLoading(false);  // Stop loading
+        return;
+      }
+
+      toast.info('Verifying your payment, please wait...', { autoClose: false, toastId: 'verify-toast' });
+
       try {
         const res = await fetch(`/api/payment-success`, {
           method: 'POST',
@@ -19,41 +35,57 @@ const PaymentSuccess = () => {
           body: JSON.stringify({ teleconsultationId }),
         });
 
-        const data = await res.json();
+        const data: PaymentSuccessResponse = await res.json();
+
         if (data.success) {
+          toast.update('verify-toast', {
+            render: 'Payment successfully verified! Teleconsultation is now approved.',
+            type: 'success',
+            autoClose: 3000,
+          });
+
+          toast.success('Receipt generated and sent via email.');
           setLoading(false);
+
+          setTimeout(() => router.push('/user/teleconsultations'), 3000); // Redirect after 3 seconds
         } else {
-          setError('Failed to update the teleconsultation status.');
+          toast.update('verify-toast', {
+            render: data.message || 'Failed to verify the payment.',
+            type: 'error',
+            autoClose: 5000,
+          });
+          setError(data.message || 'Failed to update the teleconsultation status.');
         }
       } catch (err) {
+        toast.update('verify-toast', {
+          render: 'An error occurred while verifying the payment.',
+          type: 'error',
+          autoClose: 5000,
+        });
         setError('An error occurred while verifying the payment.');
+      } finally {
+        setLoading(false);
       }
     };
 
-    if (teleconsultationId) {
-      verifyPayment();
-    } else {
-      setError('Teleconsultation ID is missing.');
-    }
-  }, [teleconsultationId]);
-
-  if (loading) return <p>Verifying payment...</p>;
-  if (error) return <p className="text-red-500">{error}</p>;
+    verifyPayment();
+  }, [teleconsultationId, router]);
 
   return (
     <div className="container mx-auto py-8">
-      <h1 className="text-3xl font-bold text-center mb-4">Payment Successful!</h1>
-      <p className="text-center text-lg">
-        Your teleconsultation has been successfully booked and approved. You can now view it in your dashboard.
-      </p>
-      <div className="text-center mt-6">
-        <button
-          className="bg-blue-600 text-white py-2 px-4 rounded"
-          onClick={() => router.push('/user/teleconsultations')}
-        >
-          Go to Teleconsultations
-        </button>
-      </div>
+      <ToastContainer />
+      <h1 className="text-3xl font-bold text-center mb-4">Payment Status</h1>
+      {loading ? (
+        <p className="text-center text-lg">Verifying payment...</p>
+      ) : (
+        <p className="text-center text-lg">
+          {error ? (
+            <span className="text-red-500">{error}</span>
+          ) : (
+            'Your teleconsultation has been successfully booked and approved. You can now view it in your dashboard.'
+          )}
+        </p>
+      )}
     </div>
   );
 };
