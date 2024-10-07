@@ -266,22 +266,22 @@ const SidebarContent = {
           name: "User Management",
           icon: "solar:users-outline",
           id: uniqueId(),
-          url: "/admin/users/user-management",
+          url: "/admin/users/",
           children: [
             {
               name: "View All Users",
               id: uniqueId(),
-              url: "/admin/user/user-management/view-all",
+              url: "/admin/users/view-all",
             },
             {
               name: "Add New User",
               id: uniqueId(),
-              url: "/admin/user/user-management/add-user",
+              url: "/admin/users/add-user",
             },
             {
               name: "User Permissions",
               id: uniqueId(),
-              url: "/admin/user/user-management/permissions",
+              url: "/admin/users/permissions",
             },
           ],
         },
