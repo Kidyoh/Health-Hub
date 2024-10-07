@@ -6,7 +6,7 @@ import ProductRevenue from "../components/dashboard/ProductRevenue";
 import DailyActivity from "../components/dashboard/DailyActivity";
 import BlogCards from "../components/dashboard/BlogCards";
 import Link from "next/link";
-import TeleconsultationsList from "../components/teleconsultations/teleconsultations";
+import TeleconsultationsList from "../components/user/teleconsultations/teleconsultations";
 
 const page = () => {
   return (

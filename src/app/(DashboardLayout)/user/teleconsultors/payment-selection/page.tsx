@@ -1,4 +1,4 @@
-import SelectPaymentGateway from '@/app/components/paymentGateway/selectPaymentGateway';
+import SelectPaymentGateway from '@/app/components/user/paymentGateway/selectPaymentGateway';
 import React from "react";
 
 const PaymentSelectionPage = () => {

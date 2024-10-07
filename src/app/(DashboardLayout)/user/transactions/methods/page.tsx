@@ -1,4 +1,4 @@
-import PaymentMethods from "@/app/components/transactions/paymentMethods";
+import PaymentMethods from "@/app/components/user/transactions/paymentMethods";
 import React from "react";
 
 const SymptomCheckerPage = () => {

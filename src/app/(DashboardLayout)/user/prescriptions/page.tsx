@@ -1,5 +1,5 @@
 import React from 'react';
-import PrescriptionsList from '@/app/components/prescriptions/prescriptionsList';
+import PrescriptionsList from '@/app/components/user/prescriptions/prescriptionsList';
 
 const PrescriptionsPage: React.FC = () => {
   // Assuming we get the userId from session or auth context

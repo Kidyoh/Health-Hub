@@ -1,4 +1,4 @@
-import HelpCenter from "@/app/components/help-articles/getHelpArticles";
+import HelpCenter from "@/app/components/user/help-articles/getHelpArticles";
 
 const FacilityRegister = () => {
       return (

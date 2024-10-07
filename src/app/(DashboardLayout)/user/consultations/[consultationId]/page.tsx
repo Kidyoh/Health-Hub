@@ -1,7 +1,7 @@
 "use client";
 import { useParams } from 'next/navigation';
-import ConsultationDashboard from "@/app/components/teleconsultation/session-start";
-import FeedbackForm from "@/app/components/feedback/feedbackModal"; 
+import ConsultationDashboard from "@/app/components/user/teleconsultation/session-start";
+import FeedbackForm from "@/app/components/user/feedback/feedbackModal"; 
 import React, { useState } from 'react';
 
 const ConsultationPage: React.FC = () => {

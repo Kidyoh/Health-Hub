@@ -1,6 +1,6 @@
 "use client"
 import { useEffect, useState } from 'react';
-import FacilitiesMap from '@/app/components/facilities/facilitiesMapper';
+import FacilitiesMap from '@/app/components/user/facilities/facilitiesMapper';
 
 const FacilitiesPage = () => {
   const [facilities, setFacilities] = useState([]);

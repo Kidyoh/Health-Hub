@@ -1,5 +1,5 @@
 
-import BookTeleconsultation from "@/app/components/teleconsultors/book";
+import BookTeleconsultation from "@/app/components/user/teleconsultors/book";
 import React from "react";
 
 const BookTeleconsultations = () => {

@@ -1,4 +1,4 @@
-import FacilitiesPage from "@/app/components/facilities/facilities";
+import FacilitiesPage from "@/app/components/user/facilities/facilities";
 import React from "react";
 
 const FacilityRegister = () => {

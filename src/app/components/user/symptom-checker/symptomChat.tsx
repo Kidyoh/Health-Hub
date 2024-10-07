@@ -1,6 +1,6 @@
 "use client"
 import React, { useState, useEffect } from 'react';
-import StyledAIResponse from '@/app/components/symptom-checker/styledAi'; // Adjust the import path as needed
+import StyledAIResponse from '@/app/components/user/symptom-checker/styledAi'; // Adjust the import path as needed
 
 interface ChatMessage {
   sender: 'user' | 'ai';

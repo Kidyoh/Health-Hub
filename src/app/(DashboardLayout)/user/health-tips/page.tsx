@@ -1,4 +1,4 @@
-import HealthTips from "@/app/components/healthTips/healthTips";
+import HealthTips from "@/app/components/user/healthTips/healthTips";
 import React from "react";
 
 const samplepage = () => {

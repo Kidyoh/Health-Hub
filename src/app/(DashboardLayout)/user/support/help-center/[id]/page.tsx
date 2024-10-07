@@ -1,5 +1,5 @@
 import React from 'react';
-import ArticleDetails from '@/app/components/help-articles/ArticleDetails';  
+import ArticleDetails from '@/app/components/user/help-articles/ArticleDetails';  
 const HelpCenterArticlePage: React.FC = () => {
       return (
             <div>

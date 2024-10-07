@@ -1,7 +1,7 @@
 "use client"
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import AddPaymentMethod from '@/app/components/transactions/addPaymentMethods';
+import AddPaymentMethod from '@/app/components/user/transactions/addPaymentMethods';
 
 const PaymentMethods = () => {
   interface PaymentMethod {

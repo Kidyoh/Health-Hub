@@ -1,4 +1,4 @@
-import MyTransactions from "@/app/components/transactions/paymentHistory";
+import MyTransactions from "@/app/components/user/transactions/paymentHistory";
 import React from "react";
 
 const SymptomCheckerPage = () => {

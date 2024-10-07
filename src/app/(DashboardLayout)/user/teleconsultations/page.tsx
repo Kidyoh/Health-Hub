@@ -1,5 +1,5 @@
-import TeleconsultationsList from "@/app/components/teleconsultations/teleconsultations";
-import TeleconsultorsList from "@/app/components/teleconsultors/teleConsultors";
+import TeleconsultationsList from "@/app/components/user/teleconsultations/teleconsultations";
+import TeleconsultorsList from "@/app/components/user/teleconsultors/teleConsultors";
 import React from "react";
 
 const samplepage = () => {

@@ -1,4 +1,4 @@
-import SubmitTicket from "@/app/components/support-tickets/addTickets";
+import SubmitTicket from "@/app/components/user/support-tickets/addTickets";
 
 const FacilityRegister = () => {
       return (
