@@ -64,6 +64,7 @@ model HealthcareFacility {
   hours        String
   contact      String        // Facility contact number (separate from user phone number)
   type         String        // Type of facility (clinic, hospital, etc.)
+  appointmentPrice Float?    // Price for appointments
   user         User?         @relation // Linked user who created the facility
   appointments Appointment[]
   createdAt    DateTime      @default(now())

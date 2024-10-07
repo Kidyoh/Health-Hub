@@ -181,17 +181,22 @@ const SidebarContent = {
     {
       heading: "PAYMENTS",
       children: [
-        {
-          name: "Consultation Fees",
-          icon: "solar:wallet-outline",
-          id: uniqueId(),
-          url: "/teleconsultor/payments/consultation-fees",
-        },
+        // {
+        //   name: "Consultation Fees",
+        //   icon: "solar:wallet-outline",
+        //   id: uniqueId(),
+        //   url: "/teleconsultor/payments/consultation-fees",
+        // },
         {
           name: "Payment History",
-          icon: "solar:transaction-outline",
+          icon: "solar:wallet-outline",
           id: uniqueId(),
           url: "/teleconsultor/payments/history",
+        },
+        {
+          name: "Payment Methods",
+          id: uniqueId(),
+          url: "/teleconsultor/payments/methods",
         },
       ],
     },

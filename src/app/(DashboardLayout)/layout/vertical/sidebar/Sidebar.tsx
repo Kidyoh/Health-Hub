@@ -67,7 +67,7 @@ const SidebarLayout = () => {
                 <Sidebar.ItemGroup className="sidebar-nav">
                   {[...Array(5)].map((_, index) => (
                     <React.Fragment key={index}>
-                      <h5 className="text-link text-xs caption">
+                      <h5 className="text-link text-xs caption ">
                         <Skeleton width={100} />
                       </h5>
                       <Icon
