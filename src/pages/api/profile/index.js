@@ -14,7 +14,6 @@ async function handler(req, res) {
 
   if (req.method === 'GET') {
     try {
-      // Conditionally include teleconsultor and healthcareFacility based on user role
       const includeData = {
         appointments: true,
         teleconsultations: true,
@@ -23,17 +22,17 @@ async function handler(req, res) {
         prescriptions: true,
       };
 
-      // Add teleconsultor data if the user is a TELECONSULTER
+      // Add Teleconsultor data if the user is a TELECONSULTER
       if (session.role === 'TELECONSULTER') {
-        includeData.teleconsultor = true;
+        includeData.Teleconsultor = true;
       }
 
-      // Add healthcareFacility data if the user is a HEALTHCARE_FACILITY
+      // Add HealthcareFacility data if the user is a HEALTHCARE_FACILITY
       if (session.role === 'HEALTHCARE_FACILITY') {
         includeData.healthcareFacility = true;
       }
 
-      // Fetch the user based on the dynamic include object
+      // Fetch the user profile
       const user = await prisma.user.findUnique({
         where: { id: userId },
         include: includeData,
@@ -80,10 +79,13 @@ async function handler(req, res) {
 
       // Step 2: If the user is a TELECONSULTER, update teleconsultor-related data
       if (session.role === 'TELECONSULTER') {
+        // Ensure `rate` is passed as a float and not a string
+        const parsedRate = rate ? parseFloat(rate) : undefined;
+
         await prisma.teleconsultor.update({
           where: { userId },
           data: {
-            rate,
+            rate: parsedRate,  // Make sure the rate is passed as a number
             doctorInfo,
             specialties,
             workingHours,
