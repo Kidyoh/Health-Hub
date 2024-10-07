@@ -92,7 +92,7 @@ const SidebarLayout = () => {
 
   type UserRole = "USER" | "TELECONSULTER" | "HEALTHCARE_FACILITY" | "ADMIN";
 
-  const roleBasedSidebarContent = SidebarContent[userRole as UserRole] || SidebarContent['USER'];
+  const roleBasedSidebarContent = SidebarContent[userRole as UserRole] ;
 
   return (
     <div className="xl:block hidden">

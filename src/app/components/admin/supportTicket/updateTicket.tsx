@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import ReactPaginate from 'react-paginate';
+import Link from 'next/link'; // Import Link for navigation
 import toast, { Toaster } from 'react-hot-toast';
 
 interface Ticket {
@@ -22,9 +23,8 @@ const AdminTickets = () => {
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [adminMessage, setAdminMessage] = useState<string>(''); // For sending custom messages
-  const [currentPage, setCurrentPage] = useState<number>(0); // Track current page
-  const [ticketsPerPage] = useState<number>(5); // Limit number of tickets per page
+  const [currentPage, setCurrentPage] = useState<number>(0);
+  const [ticketsPerPage] = useState<number>(5);
 
   useEffect(() => {
     const fetchTickets = async () => {
@@ -48,25 +48,6 @@ const AdminTickets = () => {
     (currentPage + 1) * ticketsPerPage
   );
 
-  const updateStatus = async (id: number, newStatus: string) => {
-    try {
-      await axios.patch('/api/admin/tickets', {
-        id,
-        status: newStatus,
-        message: adminMessage,
-      });
-      setTickets((prev) =>
-        prev.map((ticket) =>
-          ticket.id === id ? { ...ticket, status: newStatus } : ticket
-        )
-      );
-      toast.success(`Ticket marked as ${newStatus}`);
-    } catch (error) {
-      toast.error('Error updating ticket status');
-      console.error('Error updating ticket status', error);
-    }
-  };
-
   const handlePageClick = (data: { selected: number }) => {
     setCurrentPage(data.selected);
   };
@@ -78,57 +59,35 @@ const AdminTickets = () => {
     <div className="container mx-auto py-8">
       <Toaster />
       <h1 className="text-3xl font-bold mb-4">Support Tickets</h1>
-      <ul>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {displayedTickets.map((ticket) => (
-          <li key={ticket.id} className="border p-4 mb-4">
-            <p>
-              <strong>{ticket.title}</strong> - {ticket.status}
+          <div key={ticket.id} className="bg-white shadow-md rounded-lg p-6 border">
+            <h2 className="text-xl font-semibold mb-2">{ticket.title}</h2>
+            <p className="text-gray-600 mb-4">{ticket.message.slice(0, 100)}...</p> {/* Show a preview */}
+            <p className="text-gray-500 mb-4">
+              Submitted by {ticket.user.firstName} {ticket.user.lastName} ({ticket.user.email})
             </p>
-            <p>{ticket.message}</p>
-            <p>
-              Submitted by {ticket.user.firstName} {ticket.user.lastName} (
-              {ticket.user.email})
-            </p>
-            <div className="mt-4">
-              <label className="block mb-2 text-gray-700">
-                Admin Message (optional):
-              </label>
-              <textarea
-                value={adminMessage}
-                onChange={(e) => setAdminMessage(e.target.value)}
-                className="w-full p-2 border border-gray-300 rounded"
-                placeholder="Write a custom message to the user"
-              />
-              <button
-                onClick={() => updateStatus(ticket.id, 'Resolved')}
-                className="bg-green-500 text-white py-2 px-4 mr-2 mt-2 rounded"
-                disabled={ticket.status === 'Resolved'} // Disable if already resolved
-              >
-                {ticket.status === 'Resolved' ? 'Resolved' : 'Mark as Resolved'}
-              </button>
-              <button
-                onClick={() => updateStatus(ticket.id, 'Closed')}
-                className="bg-red-500 text-white py-2 px-4 mt-2 rounded"
-                disabled={ticket.status === 'Closed'} // Disable if already closed
-              >
-                {ticket.status === 'Closed' ? 'Closed' : 'Close Ticket'}
-              </button>
-            </div>
-          </li>
+            <p className="text-sm text-gray-500 mb-4">Status: {ticket.status}</p>
+            <Link href={`/admin/support/ticket/${ticket.id}`} legacyBehavior>
+              <a className="text-blue-500 underline">Read More</a>
+            </Link>
+          </div>
         ))}
-      </ul>
+      </div>
 
-      <ReactPaginate
-        previousLabel={"← Previous"}
-        nextLabel={"Next →"}
-        pageCount={pageCount}
-        onPageChange={handlePageClick}
-        containerClassName={"pagination"}
-        previousLinkClassName={"pagination__link"}
-        nextLinkClassName={"pagination__link"}
-        disabledClassName={"pagination__link--disabled"}
-        activeClassName={"pagination__link--active"}
-      />
+      <div className="mt-8">
+        <ReactPaginate
+          previousLabel={"← Previous"}
+          nextLabel={"Next →"}
+          pageCount={pageCount}
+          onPageChange={handlePageClick}
+          containerClassName={"pagination flex justify-center"}
+          previousLinkClassName={"pagination__link p-2"}
+          nextLinkClassName={"pagination__link p-2"}
+          disabledClassName={"pagination__link--disabled text-gray-400"}
+          activeClassName={"pagination__link--active text-blue-500"}
+        />
+      </div>
     </div>
   );
 };
