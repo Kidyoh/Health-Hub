@@ -301,19 +301,19 @@ const SidebarContent = {
           name: "Financial Reports",
           icon: "solar:report-outline",
           id: uniqueId(),
-          url: "/reports/financial",
+          url: "/admin/reports/financial",
         },
         {
           name: "User Activity Reports",
           icon: "solar:activity-outline",
           id: uniqueId(),
-          url: "/reports/activity",
+          url: "/admin/reports/activity",
         },
         {
           name: "Consultation Reports",
           icon: "solar:report-outline",
           id: uniqueId(),
-          url: "/reports/consultations",
+          url: "/admin/reports/consultations",
         },
         {
           name: "System Logs",
