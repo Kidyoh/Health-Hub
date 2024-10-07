@@ -1,14 +1,14 @@
-import AddNewUser from "@/app/components/admin/user-management/addUsers";
+import FacilityManagement from "@/app/components/admin/facilities/getAndManageFacilities";
 import React from "react";
 
-const AdminAddNewUsers = () => {
+const AdminUpdateFacilities = () => {
   return (
     <>
       <div className="rounded-xl dark:shadow-dark-md shadow-md bg-white dark:bg-darkgray p-6 relative w-full break-words">
-       <AddNewUser />
+       <FacilityManagement />
       </div>
     </>
   );
 };
 
-export default AdminAddNewUsers;
+export default AdminUpdateFacilities;

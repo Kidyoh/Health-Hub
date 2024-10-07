@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react";
 import { Button, Modal } from "flowbite-react";
 import axios from "axios";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 interface User {
   id: number;
@@ -12,15 +14,7 @@ interface User {
   phone: string;
   role: string;
   status: string;
-  location?: string;
-  teleconsultor?: TeleconsultorProfile;
   password?: string;
-}
-
-interface TeleconsultorProfile {
-  rate?: number;
-  doctorInfo?: string;
-  specialties?: string;
 }
 
 const UserManagement = () => {
@@ -61,14 +55,21 @@ const UserManagement = () => {
 
   // Save the updated user information
   const handleSave = async () => {
+    if (!editingUser?.firstName || !editingUser?.lastName || !editingUser?.email) {
+      toast.error("First name, last name, and email are required.");
+      return;
+    }
+
     if (editingUser) {
       try {
         await axios.put(`/api/admin/users/${editingUser.id}`, editingUser);
+        toast.success("User updated successfully");
         setModalOpen(false);
-        alert("User updated successfully");
+        const res = await axios.get("/api/admin/users");
+        setUsers(res.data.users); // Refetch updated data
       } catch (error) {
         console.error("Error updating user", error);
-        alert("Failed to update user");
+        toast.error("Failed to update user");
       }
     }
   };
@@ -80,6 +81,7 @@ const UserManagement = () => {
   return (
     <div className="container mx-auto p-6">
       <h1 className="text-4xl font-bold text-center mb-6">User Management</h1>
+      <ToastContainer />
       <table className="table-auto w-full border-collapse border border-gray-300 shadow-lg">
         <thead>
           <tr className="bg-gray-100">
@@ -116,54 +118,82 @@ const UserManagement = () => {
           <Modal.Header>Edit User</Modal.Header>
           <Modal.Body>
             <div className="space-y-4">
-              <input
-                name="firstName"
-                placeholder="First Name"
-                value={editingUser.firstName}
-                onChange={handleChange}
-                className="w-full border px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-              <input
-                name="lastName"
-                placeholder="Last Name"
-                value={editingUser.lastName}
-                onChange={handleChange}
-                className="w-full border px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-              <input
-                name="email"
-                placeholder="Email"
-                value={editingUser.email}
-                onChange={handleChange}
-                className="w-full border px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-              <input
-                name="phone"
-                placeholder="Phone"
-                value={editingUser.phone}
-                onChange={handleChange}
-                className="w-full border px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-              <select
-                name="role"
-                value={editingUser.role}
-                onChange={(e) =>
-                  setEditingUser({ ...editingUser, role: e.target.value })
-                }
-                className="w-full border px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="USER">USER</option>
-                <option value="TELECONSULTER">TELECONSULTER</option>
-                <option value="ADMIN">ADMIN</option>
-              </select>
-              <input
-                name="password"
-                placeholder="Password"
-                value={editingUser.password || ""}
-                onChange={handleChange}
-                type="password"
-                className="w-full border px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
+              <div>
+                <label className="block text-sm font-medium text-gray-700">First Name</label>
+                <input
+                  name="firstName"
+                  value={editingUser.firstName}
+                  onChange={handleChange}
+                  className="w-full border px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Last Name</label>
+                <input
+                  name="lastName"
+                  value={editingUser.lastName}
+                  onChange={handleChange}
+                  className="w-full border px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Email</label>
+                <input
+                  name="email"
+                  value={editingUser.email}
+                  onChange={handleChange}
+                  className="w-full border px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Phone</label>
+                <input
+                  name="phone"
+                  value={editingUser.phone || ""}
+                  onChange={handleChange}
+                  className="w-full border px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Role</label>
+                <select
+                  name="role"
+                  value={editingUser.role}
+                  onChange={(e) =>
+                    setEditingUser({ ...editingUser, role: e.target.value })
+                  }
+                  className="w-full border px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="USER">USER</option>
+                  <option value="TELECONSULTER">TELECONSULTER</option>
+                  <option value="ADMIN">ADMIN</option>
+                  <option value="HEALTHCARE_FACILITY">HEALTHCARE FACILITY</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Status</label>
+                <select
+                  name="status"
+                  value={editingUser.status}
+                  onChange={(e) =>
+                    setEditingUser({ ...editingUser, status: e.target.value })
+                  }
+                  className="w-full border px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="PENDING">PENDING</option>
+                  <option value="APPROVED">APPROVED</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Password</label>
+                <input
+                  name="password"
+                  value={editingUser.password || ""}
+                  onChange={handleChange}
+                  type="password"
+                  className="w-full border px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
             </div>
           </Modal.Body>
           <Modal.Footer>

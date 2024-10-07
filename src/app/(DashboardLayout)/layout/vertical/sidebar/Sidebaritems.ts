@@ -278,18 +278,13 @@ const SidebarContent = {
               id: uniqueId(),
               url: "/admin/user/adduser",
             },
-            {
-              name: "User Permissions",
-              id: uniqueId(),
-              url: "/admin/user/permissions",
-            },
           ],
         },
         {
           name: "Facility Management",
           icon: "solar:buildings-outline",
           id: uniqueId(),
-          url: "/facility-management",
+          url: "/admin/facilities",
         },
         {
           name: "Teleconsultor Management",
