@@ -130,8 +130,21 @@ model Teleconsultor {
   feedbacks Feedback[]
 
   Teleconsultation Teleconsultation[]
+
+  Availability Availability[]
 }
 
+model Availability {
+  id            Int      @id @default(autoincrement())
+  teleconsultorId Int     // Foreign key to the teleconsultor
+  dayOfWeek     String    // Day of the week (e.g., 'Monday', 'Tuesday')
+  startTime     String    // Start time (e.g., '09:00 AM')
+  endTime       String    // End time (e.g., '05:00 PM')
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  teleconsultor Teleconsultor @relation(fields: [teleconsultorId], references: [id])
+}
 
 
 model Session {
