@@ -1,3 +1,4 @@
+// /api/telemedicine/[id]/feedback.ts
 import { withIronSession } from 'next-iron-session';
 import { PrismaClient } from '@prisma/client';
 
@@ -14,48 +15,39 @@ async function handler(req, res) {
 
   if (req.method === 'POST') {
     try {
-      // Step 1: Find the teleconsultation to get the doctor name
+      // Step 1: Find the teleconsultation and include the teleconsultor user data
       const teleconsultation = await prisma.teleconsultation.findUnique({
         where: { id: parseInt(id, 10) },
-        include: { user: true }, // Ensure we're including related data like the teleconsultor
+        include: { teleconsultor: { include: { user: true } } }, // Include teleconsultor and their user data
       });
 
       if (!teleconsultation) {
         return res.status(404).json({ error: 'Teleconsultation not found.' });
       }
 
-      console.log('Teleconsultation data:', teleconsultation); // Log teleconsultation data
-
-      // Step 2: Lookup the teleconsultor's ID based on the doctor's name
-      const teleconsultor = await prisma.teleconsultor.findFirst({
-        where: { doctorName: teleconsultation.doctor }, // Match by the doctor's name
-      });
-
-      console.log('Teleconsultor doctorName:', teleconsultation.doctor); // Log doctor's name being used to query teleconsultor
-      console.log('Teleconsultor data:', teleconsultor); // Log teleconsultor data
+      const teleconsultor = teleconsultation.teleconsultor;
 
       if (!teleconsultor) {
         return res.status(404).json({ error: 'Teleconsultor not found.' });
       }
 
-      // Step 3: Create the feedback and associate it with the teleconsultor's ID
+      // Step 2: Create the feedback and associate it with the teleconsultation's ID
       const newFeedback = await prisma.feedback.create({
         data: {
           userId: session.id, // User who gave the feedback
           teleconsultationId: teleconsultation.id, // Relate feedback to the teleconsultation
-          teleconsultorId: teleconsultor.id, // Relate feedback to the teleconsultor
           content: feedback,
           rating,
         },
       });
 
-      // Step 4: Calculate the new average rating for the teleconsultor
+      // Step 3: Calculate the new average rating for the teleconsultor
       const avgRating = await prisma.feedback.aggregate({
-        where: { teleconsultorId: teleconsultor.id }, // Aggregate ratings for the teleconsultor
+        where: { teleconsultationId: teleconsultation.id }, // Aggregate ratings for the teleconsultation
         _avg: { rating: true },
       });
 
-      // Step 5: Update the teleconsultor's rating in the Teleconsultor model
+      // Step 4: Update the teleconsultor's rating in the Teleconsultor model
       await prisma.teleconsultor.update({
         where: { id: teleconsultor.id },
         data: { rating: avgRating._avg.rating }, 

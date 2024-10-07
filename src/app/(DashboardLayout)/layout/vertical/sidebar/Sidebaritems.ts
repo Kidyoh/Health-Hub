@@ -266,7 +266,7 @@ const SidebarContent = {
           name: "User Management",
           icon: "solar:users-outline",
           id: uniqueId(),
-          url: "/user-management",
+          url: "/admin/users/user-management",
           children: [
             {
               name: "View All Users",
