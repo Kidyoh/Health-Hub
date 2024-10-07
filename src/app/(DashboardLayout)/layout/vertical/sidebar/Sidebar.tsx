@@ -40,7 +40,7 @@ const SidebarLayout = () => {
   useEffect(() => {
     const fetchUserRole = async () => {
       try {
-        const response = await fetch("/api/user");
+        const response = await fetch("/api/auth/getUser");
         const data = await response.json();
         if (data.success) {
           setUserRole(data.user.role);

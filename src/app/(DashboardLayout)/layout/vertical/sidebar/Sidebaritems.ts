@@ -120,12 +120,12 @@ const SidebarContent = {
           id: uniqueId(),
           url: "/user/support/ticket",
         },
-        {
-          name: "Live Chat",
-          icon: "solar:chat-outline",
-          id: uniqueId(),
-          url: "/user/support/live-chat",
-        },
+        // {
+        //   name: "Live Chat",
+        //   icon: "solar:chat-outline",
+        //   id: uniqueId(),
+        //   url: "/user/support/live-chat",
+        // },
       ],
     },
   ],
