@@ -271,17 +271,17 @@ const SidebarContent = {
             {
               name: "View All Users",
               id: uniqueId(),
-              url: "/user-management/view-all",
+              url: "/admin/user/user-management/view-all",
             },
             {
               name: "Add New User",
               id: uniqueId(),
-              url: "/user-management/add-user",
+              url: "/admin/user/user-management/add-user",
             },
             {
               name: "User Permissions",
               id: uniqueId(),
-              url: "/user-management/permissions",
+              url: "/admin/user/user-management/permissions",
             },
           ],
         },
