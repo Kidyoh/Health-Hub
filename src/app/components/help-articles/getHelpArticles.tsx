@@ -48,7 +48,7 @@ const HelpCenter: React.FC = () => {
                                     <h2 className="text-xl font-semibold mb-2">{article.title}</h2>
                                     <p>{article.content.slice(0, 150)}...</p>
                                     <span className="block mt-2 text-sm text-gray-500">{article.category}</span>
-                                    <Link href={`/user/support/help-center/${article.id}`}>
+                                    <Link href={`/user/support/help-center/${article.id}`} legacyBehavior>
                                           <a className="text-blue-500 mt-4 block">Read More</a>
                                     </Link>
                               </div>

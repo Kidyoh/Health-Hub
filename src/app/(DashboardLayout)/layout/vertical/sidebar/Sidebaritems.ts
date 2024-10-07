@@ -103,12 +103,6 @@ const SidebarContent = {
             },
           ],
         },
-        {
-          name: "Insurance Claims",
-          icon: "solar:document-outline",
-          id: uniqueId(),
-          url: "/user/insurance-claims",
-        },
       ],
     },
     {

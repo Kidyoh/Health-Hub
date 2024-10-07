@@ -1,5 +1,3 @@
-// /pages/api/help-articles/add.js
-
 import { PrismaClient } from '@prisma/client';
 import { withIronSession } from 'next-iron-session';
 
