@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import FacilitiesMap from "@/app/components/user/facilities/facilitiesMapper";
+import dynamic from "next/dynamic";
 
 interface Facility {
   id: string;
@@ -8,14 +8,22 @@ interface Facility {
   location: string;
   contact: string;
   type: string;
-  services: string[]; // Update to array of strings
+  services: string[];
 }
+
+// Dynamically import FacilitiesMap, disabling SSR
+const FacilitiesMap = dynamic(() => import("@/app/components/user/facilities/facilitiesMapper"), {
+  ssr: false,
+});
 
 const FacilitiesPage = () => {
   const [facilities, setFacilities] = useState<Facility[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredFacilities, setFilteredFacilities] = useState<Facility[]>([]);
+  const [loading, setLoading] = useState(true); // Loading state
+  const [error, setError] = useState<string | null>(null); // Error state
 
+  // Fetch the facilities
   useEffect(() => {
     const fetchFacilities = async () => {
       try {
@@ -23,24 +31,31 @@ const FacilitiesPage = () => {
         const data = await res.json();
         if (data.success) {
           setFacilities(data.facilities);
-          setFilteredFacilities(data.facilities); // Initialize filtered facilities
+          setFilteredFacilities(data.facilities);
         } else {
-          console.error("Failed to fetch facilities:", data.error);
+          setError("Failed to fetch facilities.");
         }
       } catch (error) {
-        console.error("Error fetching facilities:", error);
+        setError("Error fetching facilities.");
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchFacilities();
   }, []);
 
+  // Filter facilities based on search query
   useEffect(() => {
     const filtered = facilities.filter((facility) =>
       facility.name.toLowerCase().includes(searchQuery.toLowerCase())
     );
     setFilteredFacilities(filtered);
   }, [searchQuery, facilities]);
+
+  // Render the component
+  if (loading) return <p>Loading facilities...</p>;
+  if (error) return <p>{error}</p>;
 
   return (
     <div className="container mx-auto my-10">
@@ -54,6 +69,7 @@ const FacilitiesPage = () => {
           className="border px-3 py-2 rounded w-full"
         />
       </div>
+      {/* Render FacilitiesMap with filtered facilities */}
       <FacilitiesMap facilities={filteredFacilities} />
     </div>
   );

@@ -11,8 +11,15 @@ import Link from "next/link";
 
 const Header = () => {
   const [isSticky, setIsSticky] = useState(false);
+  const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  useEffect(() => {
+    if (!isClient) return;
+
     const handleScroll = () => {
       if (window.scrollY > 50) {
         setIsSticky(true);
@@ -26,17 +33,18 @@ const Header = () => {
     return () => {
       window.removeEventListener("scroll", handleScroll);
     };
-  }, []);
+  }, [isClient]);
 
   // mobile-sidebar
   const [isOpen, setIsOpen] = useState(false);
   const handleClose = () => setIsOpen(false);
+
   return (
     <>
       <header
         className={`sticky top-0 z-[5] ${isSticky
-            ? "bg-white dark:bg-dark fixed w-full"
-            : "bg-white"
+          ? "bg-white dark:bg-dark fixed w-full"
+          : "bg-white"
           }`}
       >
         <Navbar
@@ -44,7 +52,6 @@ const Header = () => {
           className={`rounded-none bg-transparent dark:bg-transparent py-4 sm:px-30 px-4`}
         >
           {/* Mobile Toggle Icon */}
-
           <div className="flex gap-3 items-center justify-between w-full ">
             <div className="flex gap-2 items-center">
               <span

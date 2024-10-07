@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Spinner } from 'flowbite-react';
+
 const MyTransactions = () => {
   interface Transaction {
     id: string;
@@ -31,11 +32,14 @@ const MyTransactions = () => {
 
   // Function to handle downloading the receipt
   const downloadReceipt = async (txRef: string) => {
+    if (typeof window === 'undefined') return; // Ensure this code only runs in the browser
+
     try {
       const response = await axios.get(`/api/user/download-receipt?txRef=${txRef}`, {
         responseType: 'blob', // Ensure we handle the file response correctly
       });
 
+      // Create a link element and trigger the download
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');
       link.href = url;

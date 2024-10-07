@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Spinner } from 'flowbite-react';
+
 const MyTransactions = () => {
   interface Transaction {
     id: string;
@@ -31,6 +32,8 @@ const MyTransactions = () => {
 
   // Function to handle downloading the receipt
   const downloadReceipt = async (txRef: string) => {
+    if (typeof window === 'undefined') return; // Ensure this code only runs in the browser
+
     try {
       const response = await axios.get(`/api/user/download-receipt?txRef=${txRef}`, {
         responseType: 'blob', // Ensure we handle the file response correctly

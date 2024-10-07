@@ -1,6 +1,6 @@
 // /pages/payment-success.tsx
 "use client";
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 
 const PaymentSuccess = () => {
@@ -58,4 +58,10 @@ const PaymentSuccess = () => {
   );
 };
 
-export default PaymentSuccess;
+const PaymentSuccessPage = () => (
+  <Suspense fallback={<div>Loading...</div>}>
+    <PaymentSuccess />
+  </Suspense>
+);
+
+export default PaymentSuccessPage;
