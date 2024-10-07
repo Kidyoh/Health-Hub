@@ -17,7 +17,7 @@ interface Facility {
   location: string;
   contact: string;
   type: string;
-  services: string;
+  services: string[]; // Ensure services is an array of strings
 }
 
 const center: [number, number] = [9.145, 40.489673]; // Default center for Ethiopia
@@ -62,7 +62,7 @@ const FacilitiesMap: React.FC<{ facilities: Facility[] }> = ({ facilities }) => 
             <Popup>
               <div>
                 <h2>{facility.name}</h2>
-                <h2>{facility.services}</h2>
+                <p>{Array.isArray(facility.services) ? facility.services.join(', ') : facility.services}</p> {/* Type check */}
                 <p>{facility.contact}</p>
                 <p>{facility.type}</p>
               </div>

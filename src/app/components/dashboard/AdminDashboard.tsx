@@ -7,6 +7,7 @@ import ProductRevenue from "../dashboard/ProductRevenue";
 import DailyActivity from "../dashboard/DailyActivity";
 import BlogCards from "../dashboard/BlogCards";
 import TeleconsultationsList from "../user/teleconsultations/teleconsultations";
+import FacilitiesPage from "../user/facilities/facilities";
 
 const AdminDashboard = () => {
   return (
@@ -30,12 +31,16 @@ const AdminDashboard = () => {
       <div className="lg:col-span-8 col-span-12">
         <TeleconsultationsList />
       </div>
+      <div className="lg:col-span-8 col-span-12">
+        <FacilitiesPage />
+      </div>
       <div className="lg:col-span-4 col-span-12">
         <DailyActivity />
       </div>
       <div className="col-span-12">
         <BlogCards />
       </div>
+
     </div>
   );
 };
