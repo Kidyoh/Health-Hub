@@ -8,7 +8,7 @@ import { Icon } from "@iconify/react";
 import Link from "next/link";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
-import BlogImage from '../../../../public/images/blog/blog-img1.jpg'
+import BlogImage from '../../../../../public/images/markers/hospital-marker.svg'
 
 interface NewsArticle {
   title: string;
