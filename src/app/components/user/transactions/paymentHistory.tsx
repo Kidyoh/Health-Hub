@@ -36,7 +36,6 @@ const MyTransactions = () => {
         responseType: 'blob', // Ensure we handle the file response correctly
       });
 
-      // Create a link element and trigger the download
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');
       link.href = url;

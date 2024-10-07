@@ -22,7 +22,7 @@ export default function HelpArticles() {
   useEffect(() => {
     async function fetchArticles() {
       try {
-        const { data } = await axios.get('/api/help-articles');
+        const { data } = await axios.get('/api/admin/help-articles');
         if (data.success) {
           setArticles(data.articles);
         }
@@ -38,7 +38,7 @@ export default function HelpArticles() {
   async function createArticle(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     try {
-      const { data } = await axios.post('/api/help-articles/create', {
+      const { data } = await axios.post('/api/admin/help-articles/create', {
         title,
         content,
         category,
