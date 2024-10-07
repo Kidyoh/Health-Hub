@@ -38,9 +38,9 @@ const ArticleDetails: React.FC = () => {
     fetchArticle();
   }, [id]);
 
-  if (loading) return <p>Loading...</p>;
-  if (error) return <p>{error}</p>;
-  if (!article) return <p>No article found.</p>;
+  if (loading) return <p className="text-center text-gray-500">Loading...</p>;
+  if (error) return <p className="text-center text-red-500">{error}</p>;
+  if (!article) return <p className="text-center text-gray-500">No article found.</p>;
 
   const toggleContent = () => {
     setIsExpanded(!isExpanded);
@@ -49,21 +49,25 @@ const ArticleDetails: React.FC = () => {
   const truncatedContent = article.content.slice(0, 300); // Adjust the length as needed
 
   return (
-    <div className="container mx-auto py-8">
-      <h1 className="text-3xl font-bold mb-4">{article.title}</h1>
-      <p className="text-sm text-gray-500 mb-4">Category: {article.category}</p>
-      <p>
-        {isExpanded ? article.content : `${truncatedContent}...`}
-        <button
-          onClick={toggleContent}
-          className="text-blue-500 hover:underline ml-2"
-        >
-          {isExpanded ? 'Read Less' : 'Read More'}
-        </button>
-      </p>
-      <div className="mt-6">
-        <h3 className="text-xl font-semibold">Author</h3>
-        <p>{article.author.firstName} {article.author.lastName}</p>
+    <div className="max-w-4xl mx-auto py-12 px-6 md:px-0">
+      <div className="bg-white shadow-lg rounded-lg p-8">
+        <h1 className="text-4xl font-bold text-gray-800 mb-4">{article.title}</h1>
+        <p className="text-sm text-gray-500 italic mb-6">Category: {article.category}</p>
+        
+        <div className="text-gray-700 leading-relaxed text-lg">
+          {isExpanded ? article.content : `${truncatedContent}...`}
+          <button
+            onClick={toggleContent}
+            className="ml-2 text-blue-600 hover:text-blue-800 font-semibold focus:outline-none"
+          >
+            {isExpanded ? 'Read Less' : 'Read More'}
+          </button>
+        </div>
+
+        <div className="mt-8 border-t border-gray-200 pt-6">
+          <h3 className="text-2xl font-semibold text-gray-900">Author</h3>
+          <p className="text-lg text-gray-700">{article.author.firstName} {article.author.lastName}</p>
+        </div>
       </div>
     </div>
   );
