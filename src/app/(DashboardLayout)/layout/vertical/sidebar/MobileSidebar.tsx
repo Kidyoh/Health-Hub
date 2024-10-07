@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { Sidebar } from "flowbite-react";
-import SidebarContent from "./Sidebaritems";
+import SidebarItems from "./Sidebaritems";
 import NavItems from "./NavItems";
 import NavCollapse from "./NavCollapse";
 import SimpleBar from "simplebar-react";
@@ -10,6 +10,64 @@ import FullLogo from "../../shared/logo/FullLogo";
 import { Icon } from "@iconify/react";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
+
+// Define the SidebarContent type
+interface SidebarContentType {
+  USER: MenuItem[];
+  TELECONSULTER: MenuItem[];
+  HEALTHCARE_FACILITY: MenuItem[];
+  PHARMACY: MenuItem[];
+  ADMIN: MenuItem[];
+}
+
+// Example SidebarContent object
+const SidebarItemsContent: SidebarContentType = {
+  USER: [
+    {
+      heading: "User Menu",
+      children: [
+        { name: "Dashboard", icon: "dashboard", id: "1", url: "/dashboard" },
+        { name: "Profile", icon: "profile", id: "2", url: "/profile" },
+      ],
+    },
+  ],
+  TELECONSULTER: [
+    {
+      heading: "Teleconsult Menu",
+      children: [
+        { name: "Appointments", icon: "appointments", id: "1", url: "/appointments" },
+        { name: "Messages", icon: "messages", id: "2", url: "/messages" },
+      ],
+    },
+  ],
+  HEALTHCARE_FACILITY: [
+    {
+      heading: "Healthcare Facility Menu",
+      children: [
+        { name: "Patients", icon: "patients", id: "1", url: "/patients" },
+        { name: "Reports", icon: "reports", id: "2", url: "/reports" },
+      ],
+    },
+  ],
+  PHARMACY: [
+    {
+      heading: "Pharmacy Menu",
+      children: [
+        { name: "Orders", icon: "orders", id: "1", url: "/orders" },
+        { name: "Inventory", icon: "inventory", id: "2", url: "/inventory" },
+      ],
+    },
+  ],
+  ADMIN: [
+    {
+      heading: "Admin Menu",
+      children: [
+        { name: "Users", icon: "users", id: "1", url: "/users" },
+        { name: "Settings", icon: "settings", id: "2", url: "/settings" },
+      ],
+    },
+  ],
+};
 
 // Define the UserRole type
 type UserRole = "USER" | "TELECONSULTER" | "HEALTHCARE_FACILITY" | "PHARMACY" | "ADMIN";
@@ -97,7 +155,7 @@ const MobileSidebar = () => {
   }
 
   // Access the menu based on the user's role
-  const roleBasedSidebarContent = SidebarContent[userRole as UserRole] || SidebarContent["USER"];
+  const roleBasedSidebarContent = SidebarItemsContent[userRole as UserRole] || SidebarItemsContent["USER"];
 
   return (
     <div className="block">
