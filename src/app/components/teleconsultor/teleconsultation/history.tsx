@@ -19,7 +19,7 @@ const ConsultationHistory = () => {
   useEffect(() => {
     const fetchConsultationHistory = async () => {
       try {
-        const response = await axios.get("/api/teleconsultor/consultations/history");
+        const response = await axios.get("/api/teleconsultors/consultations/history");
         setConsultations(response.data.consultations);
       } catch (error) {
         setError("Failed to fetch consultation history.");

@@ -38,7 +38,7 @@ const ConsultationDashboard: React.FC<ConsultationDashboardProps> = ({ consultat
 
   const endSession = async () => {
     try {
-      await axios.post(`/api/teleconsultation/${consultationId}/end-session`, { 
+      await axios.post(`/api/teleconsultors/consultations/${consultationId}/end-session`, { 
         notes, 
         medicines, 
         dosage 
