@@ -231,13 +231,7 @@ const SidebarContent = {
           icon: "solar:services-outline",
           id: uniqueId(),
           url: "/services-management",
-        },
-        {
-          name: "Staff Management",
-          icon: "solar:users-outline",
-          id: uniqueId(),
-          url: "/staff-management",
-        },
+        }
       ],
     },
     {

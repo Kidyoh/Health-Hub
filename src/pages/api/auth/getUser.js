@@ -21,7 +21,8 @@ async function handler(req, res) {
         firstName: true,
         lastName: true,
         email: true,
-        role: true,  // Include the role field
+        role: true, 
+        status:true // Include the role field
       },
     });
 
