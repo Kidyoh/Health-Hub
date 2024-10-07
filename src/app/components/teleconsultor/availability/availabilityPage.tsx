@@ -69,37 +69,54 @@ const AvailabilityPage = () => {
   };
 
   return (
-    <div className="container mx-auto p-6">
+    <div className="container mx-auto p-8">
       <h1 className="text-4xl font-bold text-center mb-6">Manage Your Availability</h1>
 
       {loading ? (
-        <p>Loading availability slots...</p>
+        <p className="text-center text-lg font-semibold">Loading availability slots...</p>
       ) : error ? (
-        <p className="text-red-500">{error}</p>
+        <p className="text-red-500 text-center">{error}</p>
       ) : (
-        <div className="bg-white shadow-md rounded-lg p-6">
-          <Button onClick={() => setModalOpen(true)} className="mb-4">
-            Add Availability Slot
-          </Button>
+        <div className="bg-white shadow-md rounded-lg p-6 max-w-3xl mx-auto">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-2xl font-semibold">Your Availability</h2>
+            <Button onClick={() => setModalOpen(true)} className="bg-blue-600 text-white shadow-sm hover:shadow-md">
+              + Add Availability Slot
+            </Button>
+          </div>
+
           {availabilities.length === 0 ? (
-            <p>No availability slots found.</p>
+            <p className="text-center text-gray-500">No availability slots found.</p>
           ) : (
-            <ul>
+            <ul className="space-y-4">
               {availabilities.map((availability) => (
-                <li key={availability.id} className="border p-4 mb-2 rounded flex justify-between items-center">
+                <li
+                  key={availability.id}
+                  className="border p-4 rounded-lg flex justify-between items-center bg-gray-50"
+                >
                   <div>
-                    <p>
-                      <strong>{availability.dayOfWeek}:</strong> {availability.startTime} - {availability.endTime}
+                    <p className="text-lg font-medium">
+                      <span className="font-semibold">{availability.dayOfWeek}:</span> {availability.startTime} -{" "}
+                      {availability.endTime}
                     </p>
                   </div>
-                  <div>
-                    <Button color="light" onClick={() => handleEdit(availability)} className="mr-2">
-                      Edit
-                    </Button>
-                    <Button color="failure" onClick={() => handleDelete(availability.id!)}>
-                      Delete
-                    </Button>
-                  </div>
+                  <div className="flex space-x-2">
+                       <Button
+                         color="light"
+                         onClick={() => handleEdit(availability)}
+                         className="text-sm font-medium bg-gray-200 hover:bg-gray-300 text-gray-700 rounded px-4 py-2"
+                       >
+                         Edit
+                       </Button>
+                       <Button
+                         color="failure"
+                         onClick={() => handleDelete(availability.id!)}
+                         className="text-sm font-medium bg-red-600 hover:bg-red-700 text-white rounded px-4 py-2"
+                       >
+                         Delete
+                       </Button>
+                        </div>
+
                 </li>
               ))}
             </ul>
@@ -111,39 +128,42 @@ const AvailabilityPage = () => {
       <Modal show={modalOpen} onClose={() => setModalOpen(false)}>
         <Modal.Header>{editAvailability?.id ? "Edit Availability" : "Add Availability"}</Modal.Header>
         <Modal.Body>
-          <Select
-            value={editAvailability?.dayOfWeek || ""}
-            onChange={(e) => setEditAvailability({ ...editAvailability!, dayOfWeek: e.target.value })}
-          >
-            <option value="">Select Day</option>
-            <option value="Monday">Monday</option>
-            <option value="Tuesday">Tuesday</option>
-            <option value="Wednesday">Wednesday</option>
-            <option value="Thursday">Thursday</option>
-            <option value="Friday">Friday</option>
-            <option value="Saturday">Saturday</option>
-            <option value="Sunday">Sunday</option>
-          </Select>
-          <input
-            type="time"
-            value={editAvailability?.startTime || ""}
-            onChange={(e) => setEditAvailability({ ...editAvailability!, startTime: e.target.value })}
-            className="mt-4 w-full border p-2 rounded-md"
-            placeholder="Start Time"
-          />
-          <input
-            type="time"
-            value={editAvailability?.endTime || ""}
-            onChange={(e) => setEditAvailability({ ...editAvailability!, endTime: e.target.value })}
-            className="mt-4 w-full border p-2 rounded-md"
-            placeholder="End Time"
-          />
+          <div className="space-y-4">
+            <Select
+              value={editAvailability?.dayOfWeek || ""}
+              onChange={(e) => setEditAvailability({ ...editAvailability!, dayOfWeek: e.target.value })}
+              className="w-full"
+            >
+              <option value="">Select Day</option>
+              <option value="Monday">Monday</option>
+              <option value="Tuesday">Tuesday</option>
+              <option value="Wednesday">Wednesday</option>
+              <option value="Thursday">Thursday</option>
+              <option value="Friday">Friday</option>
+              <option value="Saturday">Saturday</option>
+              <option value="Sunday">Sunday</option>
+            </Select>
+            <input
+              type="time"
+              value={editAvailability?.startTime || ""}
+              onChange={(e) => setEditAvailability({ ...editAvailability!, startTime: e.target.value })}
+              className="mt-4 w-full border p-2 rounded-md"
+              placeholder="Start Time"
+            />
+            <input
+              type="time"
+              value={editAvailability?.endTime || ""}
+              onChange={(e) => setEditAvailability({ ...editAvailability!, endTime: e.target.value })}
+              className="mt-4 w-full border p-2 rounded-md"
+              placeholder="End Time"
+            />
+          </div>
         </Modal.Body>
         <Modal.Footer>
-          <Button onClick={handleSave} className="bg-blue-500 text-white">
+          <Button onClick={handleSave} className="bg-blue-500 text-white shadow-sm hover:shadow-md">
             Save
           </Button>
-          <Button color="gray" onClick={() => setModalOpen(false)}>
+          <Button color="gray" onClick={() => setModalOpen(false)} className="shadow-sm hover:shadow-md">
             Cancel
           </Button>
         </Modal.Footer>
