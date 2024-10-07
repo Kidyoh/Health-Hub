@@ -18,7 +18,7 @@ async function handler(req, res) {
   try {
     // Fetch the teleconsultor details using the user ID from the session
     const teleconsultor = await prisma.teleconsultor.findUnique({
-      where: { userId: session.id }, // Find the teleconsultor based on the logged-in user's ID
+      where: { userId: session.id },
     });
     console.log('Teleconsultor:', teleconsultor);
 
@@ -27,11 +27,13 @@ async function handler(req, res) {
       return res.status(404).json({ error: 'Teleconsultor not found' });
     }
 
-    // Use the teleconsultor ID (from the teleconsultor table) to fetch the consultations
+    // Fetch upcoming consultations where teleconsultorId matches and status is 'Approved' or 'In Progress'
     const consultations = await prisma.teleconsultation.findMany({
       where: {
-        teleconsultorId: teleconsultor.id, // Match by teleconsultorId (from Teleconsultor table)
-        status: 'Approved', // Only fetch consultations that are approved
+        teleconsultorId: teleconsultor.id, // Match by teleconsultorId
+        status: {
+          in: ['Approved', 'In Progress'], // Include both 'Approved' and 'In Progress' statuses
+        },
       },
       include: {
         user: {
