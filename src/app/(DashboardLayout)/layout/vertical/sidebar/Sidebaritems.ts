@@ -332,12 +332,6 @@ const SidebarContent = {
           id: uniqueId(),
           url: "/admin/refunds",
         },
-        {
-          name: "System Invoices",
-          icon: "solar:file-invoice-outline",
-          id: uniqueId(),
-          url: "/system-invoices",
-        },
       ],
     },
     {
