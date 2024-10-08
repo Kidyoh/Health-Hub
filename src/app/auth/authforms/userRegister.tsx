@@ -33,7 +33,7 @@ export default function RegistrationStepper() {
 
   // Step state management
   const [step, setStep] = useState<number>(0);
-  const [role, setRole] = useState<string>(""); // Default role is User
+  const [role, setRole] = useState<string>("USER"); // Default role is User
   const [loading, setLoading] = useState(false); // Loading state
   const [error, setError] = useState<string | null>(null); // Error state
 
@@ -88,11 +88,7 @@ export default function RegistrationStepper() {
 
   // Navigate to the next step
   const handleNext = () => {
-    if (role === "USER") {
-      handleSubmit(); // Submit if it's a user, no next step
-    } else {
-      setStep(step + 1); // Move to the next step for other roles
-    }
+    setStep(step + 1); // Move to the next step for all roles
   };
 
   // Navigate to the previous step
@@ -104,7 +100,14 @@ export default function RegistrationStepper() {
     if (e) e.preventDefault();
     setLoading(true);
     setError(null);
-  
+
+    // Validate role
+    if (!["USER", "TELECONSULTER", "HEALTHCARE_FACILITY"].includes(role)) {
+      setError("Invalid role selected.");
+      setLoading(false);
+      return;
+    }
+
     // Prepare the payload
     const payload = {
       ...userData,
@@ -120,9 +123,9 @@ export default function RegistrationStepper() {
       }),
       role,
     };
-  
+
     console.log("Submitting payload:", payload); // Debugging
-  
+
     try {
       const response = await fetch("/api/auth/register", {
         method: "POST",
@@ -131,18 +134,17 @@ export default function RegistrationStepper() {
         },
         body: JSON.stringify(payload),
       });
-  
+
       const data = await response.json();
       console.log("API Response:", data); // Debugging
-  
+
       if (response.ok) {
         alert("Registration successful!");
-  
+
         // Check the role and navigate accordingly
         if (role === "USER") {
-          router.push("/"); // Navigate to homepage if role is USER
+          router.push("/auth/login");
         } else if (role === "TELECONSULTER" || role === "HEALTHCARE_FACILITY") {
-
           router.push("/auth/login");
           window.location.reload();
         }
@@ -157,9 +159,7 @@ export default function RegistrationStepper() {
       setLoading(false);
     }
   };
-  
-  
-  
+
   return (
     <div className="max-w-2xl mx-auto mt-8 p-4 bg-white rounded-lg shadow-lg">
       {error && <p className="text-red-600 mb-4">{error}</p>}
@@ -184,7 +184,7 @@ export default function RegistrationStepper() {
                 onClick={handleNext}
                 className="px-6 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition"
               >
-                {role === "USER" ? "Submit" : "Next"}
+                Next
               </button>
             </div>
           </div>
@@ -195,8 +195,8 @@ export default function RegistrationStepper() {
           <div>
             <h2 className="text-2xl font-bold mb-4">Step 1: User Information</h2>
             <div className="grid grid-cols-1 gap-6">
-              {/* First Name, Last Name, Email, Password, Location, Phone */}
-              {["firstName", "lastName", "email", "password", "location", "phone"].map((field) => (
+              {/* First Name, Last Name, Email, Password */}
+              {["firstName", "lastName", "email", "password"].map((field) => (
                 <div key={field}>
                   <label className="block text-gray-700 capitalize">
                     {field.replace(/([A-Z])/g, " $1") + ":"}
@@ -226,6 +226,52 @@ export default function RegistrationStepper() {
                 className="px-6 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition"
               >
                 Next
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Step 2: User Additional Information */}
+        {step === 2 && role === "USER" && (
+          <div>
+            <h2 className="text-2xl font-bold mb-4">Step 2: User Additional Information</h2>
+            <div className="grid grid-cols-1 gap-6">
+              <div>
+                <label className="block text-gray-700">Location</label>
+                <input
+                  type="text"
+                  name="location"
+                  value={userData.location}
+                  onChange={handleUserChange}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700">Phone number</label>
+                <input
+                  type="text"
+                  name="phone"
+                  value={userData.phone}
+                  onChange={handleUserChange}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md"
+                  required
+                />
+              </div>
+            </div>
+            <div className="mt-6 flex justify-between">
+              <button
+                type="button"
+                onClick={handlePrevious}
+                className="px-6 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition"
+              >
+                Previous
+              </button>
+              <button
+                type="submit"
+                className="px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition"
+              >
+                Submit
               </button>
             </div>
           </div>

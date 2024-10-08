@@ -22,17 +22,14 @@ const TeleconsultorDashboard = () => {
         }
 
         const data = await response.json();
-        console.log("Session data>>>>>>>", data);
 
         const userSession = data;
-        console.log("User session>>>>>>>", userSession);
 
 
 
-        if (userSession.role === "TELECONSULTER") {
-          setStatus(userSession.status);
+        if (userSession.user.role === "TELECONSULTER") {
+          setStatus(userSession.user.status);
         }
-        console.log("User status>>>>>>>", status);
       } catch (error) {
         setError("Failed to load session data.");
         console.error(error);
@@ -57,7 +54,7 @@ const TeleconsultorDashboard = () => {
 
   // Conditionally render the message if the teleconsultor's status is pending
   return (
-    <div className="grid grid-cols-12 gap-6 p-6">
+    <div className="">
       {status === "PENDING" ? (
         <div className="col-span-12 bg-yellow-100 text-yellow-800 p-4 rounded-md mb-6">
           <h1 className="text-xl font-bold mb-2">Approval Pending</h1>
@@ -75,13 +72,11 @@ const TeleconsultorDashboard = () => {
                 <div className="col-span-12">
                   <TotalIncome />
                 </div>
-                <div className="col-span-12 pt-8">
-                  <DailyActivity />
-                </div>
               </div>
-
             </div>
-
+            <div className="lg:col-span-4 col-span-12">
+              <DailyActivity />
+            </div>
 
           </div>
         </>
