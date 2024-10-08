@@ -330,7 +330,7 @@ const SidebarContent = {
           name: "Refund Requests",
           icon: "solar:refund-outline",
           id: uniqueId(),
-          url: "/refund-requests",
+          url: "/admin/refunds",
         },
         {
           name: "System Invoices",

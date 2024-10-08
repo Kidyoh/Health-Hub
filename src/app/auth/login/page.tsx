@@ -23,7 +23,7 @@ const BoxedLogin = () => {
             <p className="text-sm text-center text-dark my-3">Sign In on Health Hub</p>
             <AuthLogin />
             <div className="flex gap-2 text-base text-ld font-medium mt-6 items-center justify-center">
-              <p>New to Matdash?</p>
+              <p>New to Helath Hub?</p>
               <Link href="/auth/register" className="text-primary text-sm font-medium">
                 Create an account
               </Link>

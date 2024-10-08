@@ -31,7 +31,7 @@ const AuthLogin = () => {
       const data = await res.json();
       if (res.ok) {
         // Redirect to dashboard or another page after successful login
-        router.push("/dashboard");
+        router.push("/");
       } else {
         // Display error message
         setError(data.error || "Login failed. Please try again.");
