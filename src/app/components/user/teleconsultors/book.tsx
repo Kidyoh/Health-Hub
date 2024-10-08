@@ -67,6 +67,18 @@ const BookTeleconsultation = () => {
       setLoading(false);
     }
   };
+  const formatTime = (time: string) => {
+    const [hours, minutes] = time.split(':');
+    const date = new Date();
+    date.setHours(parseInt(hours), parseInt(minutes));
+
+    return date.toLocaleString('en-US', {
+      hour: 'numeric',
+      minute: 'numeric',
+      hour12: true,
+    });
+  };
+
 
   return (
     <div className="container mx-auto py-8">
@@ -80,13 +92,14 @@ const BookTeleconsultation = () => {
           <ul className="list-disc pl-5">
             {availability.map((slot: any) => (
               <li key={slot.id}>
-                {slot.dayOfWeek}: {slot.startTime} - {slot.endTime}
+                {slot.dayOfWeek}: {formatTime(slot.startTime)} - {formatTime(slot.endTime)}
               </li>
             ))}
           </ul>
         ) : (
           <p>No availability found.</p>
         )}
+
       </div>
 
       <form onSubmit={handleSubmit}>
