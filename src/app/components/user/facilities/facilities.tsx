@@ -16,6 +16,26 @@ const FacilitiesMap = dynamic(() => import("@/app/components/user/facilities/fac
   ssr: false,
 });
 
+// Loading and error messages component
+const LoadingOrError = ({ loading, error }: { loading: boolean; error: string | null }) => {
+  if (loading) return <p className="text-center text-blue-600">Loading facilities...</p>;
+  if (error) return <p className="text-center text-red-600">{error}</p>;
+  return null;
+};
+
+// Search input component with enhanced styling
+const SearchInput = ({ searchQuery, setSearchQuery }: { searchQuery: string; setSearchQuery: (query: string) => void }) => (
+  <div className="relative mb-6">
+    <input
+      type="text"
+      placeholder="Search for healthcare facilities..."
+      value={searchQuery}
+      onChange={(e) => setSearchQuery(e.target.value)}
+      className="block w-full px-4 py-3 text-lg border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition-all duration-200"
+    />
+  </div>
+);
+
 const FacilitiesPage = () => {
   const [facilities, setFacilities] = useState<Facility[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
@@ -53,24 +73,27 @@ const FacilitiesPage = () => {
     setFilteredFacilities(filtered);
   }, [searchQuery, facilities]);
 
-  // Render the component
-  if (loading) return <p>Loading facilities...</p>;
-  if (error) return <p>{error}</p>;
-
   return (
-    <div className="container mx-auto my-10">
-      <h1 className="text-3xl font-bold mb-8">Nearby Healthcare Facilities</h1>
-      <div className="mb-4">
-        <input
-          type="text"
-          placeholder="Search for facilities..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="border px-3 py-2 rounded w-full"
-        />
+    <div className="container mx-auto px-4 py-8">
+      <div className="bg-white shadow-lg rounded-lg p-8">
+        {/* Title Section */}
+        <h1 className="text-4xl font-semibold text-center text-gray-800 mb-8">
+          Nearby Healthcare Facilities
+        </h1>
+
+        {/* Search Bar */}
+        <SearchInput searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
+
+        {/* Loading and Error Messages */}
+        <LoadingOrError loading={loading} error={error} />
+
+        {/* Facilities Map */}
+        {!loading && !error && (
+          <div className="mt-8">
+            <FacilitiesMap facilities={filteredFacilities} />
+          </div>
+        )}
       </div>
-      {/* Render FacilitiesMap with filtered facilities */}
-      <FacilitiesMap facilities={filteredFacilities} />
     </div>
   );
 };

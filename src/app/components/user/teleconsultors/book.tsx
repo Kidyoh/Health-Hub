@@ -40,7 +40,7 @@ const BookTeleconsultation = () => {
         toast.warn(response.data.error || 'Unable to book teleconsultation. Please try another time.');
       }
     } catch (error) {
-      toast.error('An error occurred while booking teleconsultation. Please try again.');
+      toast.error('The teleconsultor is not available at this time. ');
       console.error('Error booking teleconsultation:', error);
     } finally {
       setLoading(false);

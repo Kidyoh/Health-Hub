@@ -3,11 +3,10 @@
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import { Badge } from "flowbite-react";
-import { TbPoint } from "react-icons/tb";
-import { Icon } from "@iconify/react";
 import Link from "next/link";
 import Skeleton from "react-loading-skeleton";
-import "react-loading-skeleton/dist/skeleton.css"; // Importing CSS for Skeleton
+import "react-loading-skeleton/dist/skeleton.css";
+import BlogImage from "../../../../public/images/blog/blog-img1.jpg"
 
 interface NewsArticle {
   title: string;
@@ -76,7 +75,7 @@ const BlogCards = () => {
                 <div className="rounded-xl dark:shadow-dark-md shadow-md bg-white dark:bg-darkgray p-0 relative w-full break-words overflow-hidden">
                   <div className="relative">
                     <Image
-                      src={item.imageUrl}
+                      src={BlogImage}
                       alt={item.title}
                       width={400}
                       height={300}
@@ -92,7 +91,7 @@ const BlogCards = () => {
 
                   <div className="px-6 pb-6">
                     <Image
-                      src={item.imageUrl}
+                      src={BlogImage}
                       className="h-10 w-10 rounded-full -mt-7 relative z-1"
                       alt={item.author}
                     />

@@ -54,6 +54,8 @@ model User {
   SupportTicket SupportTicket[]
 
   HelpArticle HelpArticle[]
+
+  RefundRequest RefundRequest[]
 }
 
 model HealthcareFacility {
@@ -87,6 +89,24 @@ model PaymentMethod {
 
   @@index([userId])
 }
+
+model RefundRequest {
+  id              Int        @id @default(autoincrement())
+  userId          Int        // Link to the user requesting the refund
+  transactionId   Int        @unique // One-to-one relation to the transaction
+  reason          String     // Reason provided by the user for the refund
+  status          Status     @default(PENDING) // Status of the refund request (PENDING, APPROVED, REJECTED)
+  adminResponse   String?    // Admin's response or reason for rejection (optional)
+  createdAt       DateTime   @default(now())   // Timestamp when the request was made
+  updatedAt       DateTime   @updatedAt
+
+  user        User        @relation(fields: [userId], references: [id])            // Link to User
+  transaction Transaction @relation(fields: [transactionId], references: [id])     // Link to Transaction with `fields` and `references` here
+
+  @@index([userId])
+  @@index([transactionId])
+}
+
 model ChatSession {
   id            Int        @id @default(autoincrement())
   userId        Int        // User who started the session
@@ -314,10 +334,13 @@ model Transaction {
   appointment      Appointment?      @relation(fields: [appointmentId], references: [id])
   teleconsultation Teleconsultation? @relation(fields: [teleconsultationId], references: [id])
 
+  refundRequest    RefundRequest?    // One-to-one relation with RefundRequest (no `@relation` fields needed here)
+
   @@index([userId])
   @@index([appointmentId])
   @@index([teleconsultationId])
 }
+
 
 model Prescription {
   id                 Int           @id @default(autoincrement())

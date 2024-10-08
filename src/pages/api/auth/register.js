@@ -1,63 +1,98 @@
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcrypt';
-import { withIronSession } from 'next-iron-session';
 
 const prisma = new PrismaClient();
 
-async function handler(req, res) {
+export default async function handler(req, res) {
   if (req.method === 'POST') {
-    const { email, password, firstName, lastName, role, healthcareFacilityData } = req.body;
+    const {
+      firstName,
+      lastName,
+      email,
+      password,
+      location: userLocation, // User's personal location
+      phone,
+      name, // Facility name for Healthcare Facility
+      location: facilityLocation, // Facility-specific location
+      services,
+      openHours, // Facility opening hours
+      closeHours, // Facility closing hours
+      contact, // Facility-specific contact number
+      type, // Facility type
+      specialties, // Teleconsultor specific fields
+      rate,
+      workingHours,
+      role,
+    } = req.body;
 
-    // Prevent users from registering as admin
-    if (role === 'ADMIN') {
-      return res.status(403).json({ error: 'Admin role is restricted.' });
-    }
-
-    // Validate required fields
-    if (!email || !password || !role) {
-      return res.status(400).json({ error: 'Email, password, and role are required.' });
-    }
-
-    // Hash the password
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    // Set status based on role
-    const status = (role === 'TELECONSULTER' || role === 'HEALTHCARE_FACILITY') ? 'PENDING' : 'APPROVED';
+    console.log("Received Fields:", { firstName, lastName, email, password, role });
 
     try {
-      // Start a transaction
-      const user = await prisma.$transaction(async (prisma) => {
-        // Create the user
-        const newUser = await prisma.user.create({
+      // Check if email is already registered
+      const existingUser = await prisma.user.findUnique({
+        where: { email },
+      });
+
+      if (existingUser) {
+        return res.status(400).json({ error: 'User with this email already exists' });
+      }
+
+      // Hash the password
+      const hashedPassword = await bcrypt.hash(password, 10);
+
+      // Step 1: Create the user
+      const newUser = await prisma.user.create({
+        data: {
+          firstName,
+          lastName,
+          email,
+          password: hashedPassword,
+          location: userLocation,
+          phone,
+          role,
+        },
+      });
+
+      // Step 2: Check the role and create associated data
+      if (role === 'HEALTHCARE_FACILITY') {
+        const facility = await prisma.healthcareFacility.create({
           data: {
-            email,
-            password: hashedPassword,
-            firstName,
-            lastName,
-            role,
-            status,
+            name,
+            location: facilityLocation,
+            services,
+            hours: `${openHours} - ${closeHours}`,
+            contact,
+            type,
+            user: {
+              connect: { id: newUser.id },
+            },
           },
         });
 
-        // If the user is a healthcare facility, create the facility
-        if (role === 'HEALTHCARE_FACILITY' && healthcareFacilityData) {
-          await prisma.healthcareFacility.create({
-            data: {
-              name: healthcareFacilityData.name,
-              location: healthcareFacilityData.location,
-              services: healthcareFacilityData.services,
-              hours: healthcareFacilityData.hours,
-              contact: healthcareFacilityData.contact,
-              type: healthcareFacilityData.type,
-              userId: newUser.id, // Link to the user
+        // Update user with healthcare facility ID
+        await prisma.user.update({
+          where: { id: newUser.id },
+          data: { healthcareFacilityId: facility.id },
+        });
+      }
+
+      if (role === 'TELECONSULTER') {
+        const teleconsultor = await prisma.teleconsultor.create({
+          data: {
+            user: {
+              connect: { id: newUser.id },
             },
-          });
-        }
+            specialties,
+            rate: parseFloat(rate), // Make sure rate is stored as a float
+            workingHours,
+          },
+        });
 
-        return newUser;
-      });
+        // No need to update user in this case as teleconsultor info is separate
+      }
 
-      res.status(201).json({ success: true, user });
+      // Respond with success
+      res.status(201).json({ success: true, data: { user: newUser } });
     } catch (error) {
       console.error('Error registering user:', error);
       res.status(500).json({ error: 'User registration failed.' });
@@ -65,12 +100,6 @@ async function handler(req, res) {
   } else {
     res.status(405).json({ error: 'Method not allowed' });
   }
-}
 
-export default withIronSession(handler, {
-  password: process.env.SECRET_COOKIE_PASSWORD,
-  cookieName: 'next-iron-session/login',
-  cookieOptions: {
-    secure: process.env.NODE_ENV === 'production',
-  },
-});
+  prisma.$disconnect();
+}

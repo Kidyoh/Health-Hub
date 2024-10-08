@@ -37,7 +37,6 @@ const FacilitiesMap: React.FC<{ facilities: Facility[] }> = ({ facilities }) => 
       navigator.geolocation.getCurrentPosition((position) => {
         const userLoc: [number, number] = [position.coords.latitude, position.coords.longitude];
         setUserLocation(userLoc);
-        // Find the nearest facility based on user location
         const nearest = findNearestFacility(userLoc, facilities);
         setNearestFacility(nearest);
       });
@@ -54,24 +53,22 @@ const FacilitiesMap: React.FC<{ facilities: Facility[] }> = ({ facilities }) => 
     }
   }, [filterType, facilities]);
 
-  // Calculate the distance between two coordinates using the Haversine formula
   const calculateDistance = (loc1: [number, number], loc2: [number, number]) => {
     const toRad = (value: number) => (value * Math.PI) / 180;
     const lat1 = loc1[0];
     const lon1 = loc1[1];
     const lat2 = loc2[0];
     const lon2 = loc2[1];
-    const R = 6371; // Radius of the Earth in km
+    const R = 6371;
     const dLat = toRad(lat2 - lat1);
     const dLon = toRad(lon2 - lon1);
     const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
               Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
               Math.sin(dLon / 2) * Math.sin(dLon / 2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    return R * c; // Distance in km
+    return R * c;
   };
 
-  // Find the nearest facility to the user's location
   const findNearestFacility = (userLoc: [number, number], facilities: Facility[]) => {
     let nearest = facilities[0];
     let minDistance = calculateDistance(userLoc, parseLocation(facilities[0].location));
@@ -85,7 +82,6 @@ const FacilitiesMap: React.FC<{ facilities: Facility[] }> = ({ facilities }) => 
     return parseLocation(nearest.location);
   };
 
-  // Convert facility location to [lat, lng]
   const parseLocation = (location: string): [number, number] => {
     const [lat, lng] = location
       .replace('Latitude: ', '')
@@ -95,17 +91,20 @@ const FacilitiesMap: React.FC<{ facilities: Facility[] }> = ({ facilities }) => 
     return [lat, lng];
   };
 
-  // Handle adding multiple waypoints
   const handleFacilitySelect = (position: [number, number]) => {
-    setSelectedFacilities((prev) => [...prev, position]); // Add selected facility to the route
+    setSelectedFacilities((prev) => [...prev, position]);
   };
 
   return (
     <>
       {/* Filter dropdown */}
-      <div className="filter-container">
-        <label>Filter by Type: </label>
-        <select value={filterType} onChange={(e) => setFilterType(e.target.value)}>
+      <div className="filter-container mb-4 text-center">
+        <label className="font-medium text-lg">Filter by Type: </label>
+        <select
+          value={filterType}
+          onChange={(e) => setFilterType(e.target.value)}
+          className="ml-2 px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+        >
           <option value="">All</option>
           <option value="General">General Hospital</option>
           <option value="Specialist">Specialist Clinic</option>
@@ -113,7 +112,7 @@ const FacilitiesMap: React.FC<{ facilities: Facility[] }> = ({ facilities }) => 
         </select>
       </div>
 
-      <MapContainer center={center} zoom={8} style={{ height: '600px', width: '100%' }}>
+      <MapContainer center={center} zoom={8} style={{ height: '600px', width: '100%', borderRadius: '10px' }} className="shadow-lg">
         <TileLayer
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -132,14 +131,14 @@ const FacilitiesMap: React.FC<{ facilities: Facility[] }> = ({ facilities }) => 
           return (
             <Marker key={facility.id} position={position} icon={customIcon}>
               <Popup>
-                <div>
-                  <h2>{facility.name}</h2>
-                  <p>{Array.isArray(facility.services) ? facility.services.join(', ') : facility.services}</p>
-                  <p>{facility.contact}</p>
-                  <p>{facility.type}</p>
+                <div className="font-sans">
+                  <h2 className="text-lg font-bold text-blue-800">{facility.name}</h2>
+                  <p className="text-sm text-gray-600">{Array.isArray(facility.services) ? facility.services.join(', ') : facility.services}</p>
+                  <p className="text-sm text-gray-600">{facility.contact}</p>
+                  <p className="text-sm text-gray-600">{facility.type}</p>
                   <button
                     onClick={() => handleFacilitySelect(position)}
-                    className="mt-2 px-4 py-2 bg-blue-500 text-white rounded"
+                    className="mt-2 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-lg shadow"
                   >
                     Add to Route
                   </button>
@@ -149,7 +148,6 @@ const FacilitiesMap: React.FC<{ facilities: Facility[] }> = ({ facilities }) => 
           );
         })}
 
-        {/* If user's location and selected facility is available, add routing */}
         {userLocation && selectedFacilities.length > 0 && (
           <RoutingControl
             waypoints={[L.latLng(userLocation[0], userLocation[1]), ...selectedFacilities.map((pos) => L.latLng(pos[0], pos[1]))]}
@@ -160,7 +158,6 @@ const FacilitiesMap: React.FC<{ facilities: Facility[] }> = ({ facilities }) => 
   );
 };
 
-// Routing Control with multiple waypoints
 const RoutingControl: React.FC<{ waypoints: L.LatLng[] }> = ({ waypoints }) => {
   const map = useMap();
 
@@ -181,12 +178,11 @@ const RoutingControl: React.FC<{ waypoints: L.LatLng[] }> = ({ waypoints }) => {
   return null;
 };
 
-// Set the map view to the nearest facility
 const SetMapView: React.FC<{ position: [number, number] }> = ({ position }) => {
   const map = useMap();
   useEffect(() => {
     if (position) {
-      map.setView(position, 12); // Adjust zoom as needed
+      map.setView(position, 12);
     }
   }, [map, position]);
 

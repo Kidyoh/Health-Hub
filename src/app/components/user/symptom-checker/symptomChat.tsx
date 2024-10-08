@@ -130,7 +130,7 @@ const SymptomChecker: React.FC = () => {
   return (
     <div className="flex">
       {/* Sidebar with chat sessions */}
-      <div className="w-1/4 p-4 bg-gray-100">
+      {/* <div className="w-1/4 p-4 bg-gray-100">
         <h2 className="text-lg font-bold">Previous Sessions</h2>
         <ul>
           {chatSessions.map((session) => (
@@ -144,7 +144,7 @@ const SymptomChecker: React.FC = () => {
             </li>
           ))}
         </ul>
-      </div>
+      </div> */}
 
       {/* Chat Interface */}
       <div className="flex-grow p-4">
