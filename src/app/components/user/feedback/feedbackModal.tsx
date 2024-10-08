@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { Button, Modal } from "flowbite-react";
 import { AiFillStar, AiOutlineStar } from "react-icons/ai"; // Importing star icons
+import { useRouter } from "next/navigation"; // Import useRouter for navigation
 
 interface FeedbackModalProps {
   isOpen: boolean;
@@ -14,6 +15,8 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({ isOpen, onClose, consulta
   const [feedback, setFeedback] = useState<string>("");
   const [rating, setRating] = useState<number>(0);
   const [error, setError] = useState<string | null>(null);
+
+  const router = useRouter(); // Initialize useRouter
 
   const submitFeedback = async () => {
     const feedbackData = { rating, feedback };
@@ -34,6 +37,7 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({ isOpen, onClose, consulta
       if (response.ok) {
         alert("Thank you for your feedback.");
         onClose(); // Close the modal after submission
+        router.push("/"); // Navigate to the home page
       } else {
         setError(responseData.error || "Failed to submit feedback.");
       }
@@ -61,8 +65,13 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({ isOpen, onClose, consulta
     );
   };
 
+  const handleClose = () => {
+    onClose();
+    router.push("/");
+  };
+
   return (
-    <Modal show={isOpen} onClose={onClose} size="lg">
+    <Modal show={isOpen} onClose={handleClose} size="lg">
       <Modal.Header>Share Your Feedback</Modal.Header>
       <Modal.Body>
         <p className="text-gray-600 mb-4">Please rate your consultation experience:</p>
@@ -84,7 +93,7 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({ isOpen, onClose, consulta
         <Button onClick={submitFeedback} color="success" disabled={rating === 0 || feedback === ""}>
           Submit Feedback
         </Button>
-        <Button onClick={onClose} color="gray">
+        <Button onClick={handleClose} color="gray">
           Close
         </Button>
       </Modal.Footer>
