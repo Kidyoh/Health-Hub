@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import axios from 'axios';
 import { ToastContainer, toast } from 'react-toastify';
@@ -9,9 +9,30 @@ import 'react-toastify/dist/ReactToastify.css';
 const BookTeleconsultation = () => {
   const [date, setDate] = useState('');
   const [loading, setLoading] = useState(false);
+  const [availability, setAvailability] = useState([]);
   const router = useRouter();
   const params = useParams();
   const id = params?.id as string | undefined;
+
+  // Fetch availability when the component mounts
+  useEffect(() => {
+    const fetchAvailability = async () => {
+      if (!id) {
+        toast.error('Teleconsultor ID is missing.');
+        return;
+      }
+
+      try {
+        const response = await axios.get(`/api/teleconsultors/${id}/availability`);
+        setAvailability(response.data.availability || []);
+      } catch (error) {
+        toast.error('Error fetching availability.');
+        console.error('Error fetching availability:', error);
+      }
+    };
+
+    fetchAvailability();
+  }, [id]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,7 +61,7 @@ const BookTeleconsultation = () => {
         toast.warn(response.data.error || 'Unable to book teleconsultation. Please try another time.');
       }
     } catch (error) {
-      toast.error('The teleconsultor is not available at this time. ');
+      toast.error('The teleconsultor is not available at this time.');
       console.error('Error booking teleconsultation:', error);
     } finally {
       setLoading(false);
@@ -51,6 +72,23 @@ const BookTeleconsultation = () => {
     <div className="container mx-auto py-8">
       <ToastContainer />
       <h1 className="text-3xl font-bold mb-4">Book Teleconsultation</h1>
+
+      {/* Display availability */}
+      <div className="mb-4">
+        <h2 className="text-xl font-semibold mb-2">Available Times:</h2>
+        {availability.length > 0 ? (
+          <ul className="list-disc pl-5">
+            {availability.map((slot: any) => (
+              <li key={slot.id}>
+                {slot.dayOfWeek}: {slot.startTime} - {slot.endTime}
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p>No availability found.</p>
+        )}
+      </div>
+
       <form onSubmit={handleSubmit}>
         <div className="mb-4">
           <label className="block text-sm font-medium text-gray-700">
