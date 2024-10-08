@@ -7,7 +7,7 @@ async function handler(req, res) {
   const session = req.session.get('user');
 
   // Check if session exists and user is an ADMIN
-  if (!session || session.role !== 'ADMIN') {
+  if (!session || session.role !== 'ADMIN' && session.role !== 'TELECONSULTER') {
     return res.status(403).json({ error: 'Unauthorized access' });
   }
 

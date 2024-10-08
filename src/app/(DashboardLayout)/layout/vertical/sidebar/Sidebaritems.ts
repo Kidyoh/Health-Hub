@@ -107,6 +107,11 @@ const SidebarContent = {
               id: uniqueId(),
               url: "/user/transactions/methods",
             },
+            {
+              name: "Refund Requests",
+              id: uniqueId(),
+              url: "/user/refunds",
+            },
           ],
         },
       ],

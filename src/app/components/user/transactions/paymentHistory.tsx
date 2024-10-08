@@ -39,6 +39,8 @@ const MyTransactions = () => {
         responseType: 'blob', // Ensure we handle the file response correctly
       });
 
+      console.log('Download receipt response:', response);
+
       // Create a link element and trigger the download
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');

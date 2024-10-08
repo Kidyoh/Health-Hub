@@ -1,4 +1,3 @@
-// /pages/api/teleconsultor/consultations/history.ts
 import { withIronSession } from 'next-iron-session';
 import { PrismaClient } from '@prisma/client';
 
@@ -11,26 +10,45 @@ async function handler(req, res) {
     return res.status(403).json({ error: 'Forbidden' });
   }
 
+  const teleconsultor = await prisma.teleconsultor.findUnique({
+    where: { userId: session.id },
+  });
+
   try {
     const consultations = await prisma.teleconsultation.findMany({
       where: {
-        teleconsultorId: session.id,
-        status: 'Completed',
+        teleconsultorId: teleconsultor.id, // Match by teleconsultorId
+        status: "Completed", // Include only 'Completed' consultations
       },
       include: {
-        user: true,
+        user: {
+          select: {
+            firstName: true,
+            lastName: true,
+            email: true,
+          },
+        },
       },
     });
 
+    console.log('Consultations:', consultations);
+
+    // Format date and time separately before sending the response
     return res.status(200).json({
       success: true,
-      consultations: consultations.map(c => ({
-        id: c.id,
-        patientName: `${c.user.firstName} ${c.user.lastName}`,
-        date: c.date,
-        time: c.time,
-        status: c.status,
-      })),
+      consultations: consultations.map(c => {
+        const consultationDate = new Date(c.date);
+        const formattedDate = consultationDate.toLocaleDateString(); // e.g., '10/07/2024'
+        const formattedTime = consultationDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }); // e.g., '08:58 AM'
+
+        return {
+          id: c.id,
+          patientName: `${c.user.firstName} ${c.user.lastName}`,
+          date: formattedDate,  // formatted date string
+          time: formattedTime,  // formatted time string
+          status: c.status,
+        };
+      }),
     });
   } catch (error) {
     console.error(error);

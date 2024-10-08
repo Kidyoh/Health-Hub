@@ -17,7 +17,7 @@ const NavItems: React.FC<NavItemsProps> = ({ item }) => {
         href={item.url}
         as={Link}
         className={`${item.url == pathname
-          ? "!text-white bg-primary shadow-active"
+          ? "!text-purple-900 bg-primary shadow-active"
           : "text-link bg-transparent group/link "
           } `}
       >

@@ -38,10 +38,10 @@ async function handler(req, res) {
       // Update the consultation with prescription, dosage, and notes
       await prisma.teleconsultation.update({
         where: { id: parseInt(id, 10) },
-        data: { 
-          status: 'Completed', 
-          sessionUrl: null, 
-          notes, 
+        data: {
+          status: 'Completed',
+          sessionUrl: null,
+          notes,
           prescription: {
             create: {
               userId: consultation.userId, // Link to the user
@@ -53,10 +53,16 @@ async function handler(req, res) {
         },
       });
 
-      return res.status(200).json({ success: true, message: 'Session ended and prescription saved.' });
+      // Also update the related appointment status to 'Completed'
+      await prisma.appointment.updateMany({
+        where: { teleconsultationId: consultation.id },
+        data: { status: 'Completed' },
+      });
+
+      return res.status(200).json({ success: true, message: 'Session ended, prescription saved, and appointment updated.' });
     } catch (error) {
-      console.error('Error ending session:', error);
-      return res.status(500).json({ error: 'Failed to end session and save prescription.' });
+      console.error('Error ending session and updating appointment:', error);
+      return res.status(500).json({ error: 'Failed to end session, save prescription, and update appointment.' });
     }
   } else {
     return res.status(405).json({ error: 'Method not allowed' });
