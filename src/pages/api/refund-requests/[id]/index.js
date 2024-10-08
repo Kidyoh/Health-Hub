@@ -12,12 +12,17 @@ async function handler(req, res) {
   }
 
   if (req.method === 'PATCH') {
-    const { id, status, adminResponse } = req.body;
+    const { status, adminResponse } = req.body;
+    const { id } = req.query; // Extract the `id` from the query parameters
+
+    if (!id) {
+      return res.status(400).json({ error: 'Missing refund request ID' });
+    }
 
     try {
       // Update the refund request status and admin's response
       const updatedRefund = await prisma.refundRequest.update({
-        where: { id: parseInt(id) },
+        where: { id: parseInt(id) }, // Ensure `id` is an integer
         data: { status, adminResponse },
         include: {
           user: {
