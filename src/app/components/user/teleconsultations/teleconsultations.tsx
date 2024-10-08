@@ -50,6 +50,13 @@ const TeleconsultationsList: React.FC = () => {
     console.log(`Navigating to /user/consultations/${consultation.id}`); // Log the URL
     router.push(`/user/consultations/${consultation.id}`);
   };
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return new Intl.DateTimeFormat("en-GB", {
+      dateStyle: "medium",
+      timeStyle: "short",
+    }).format(date);
+  };
 
   return (
     <div className="rounded-xl dark:shadow-dark-md shadow-md bg-white dark:bg-darkgray pt-6 px-4 lg:px-6 relative w-full break-words pb-6">
@@ -80,10 +87,10 @@ const TeleconsultationsList: React.FC = () => {
               onClick={() => handleTeleconsultationClick(consultation)}
             >
               <h3 className="text-xl font-semibold mb-2 text-gray-800 dark:text-white">
-                Teleconsultation with <span className="text-primary">{consultation.doctor}</span>
+                Teleconsultation with DR. <span className="text-primary">{consultation.doctor}</span>
               </h3>
               <p className="text-gray-600 dark:text-gray-400 mb-3">
-                {new Date(consultation.date).toLocaleString()}
+                {formatDate(consultation.date)}
               </p>
               <p
                 className={`font-semibold mb-4 ${
