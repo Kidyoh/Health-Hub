@@ -200,6 +200,29 @@ const SidebarContent = {
         },
       ],
     },
+    {
+      heading: "SUPPORT",
+      children: [
+        {
+          name: "Help Center",
+          icon: "solar:help-outline",
+          id: uniqueId(),
+          url: "/teleconsultor/support/help-center",
+        },
+        {
+          name: "Submit a Ticket",
+          icon: "solar:message-outline",
+          id: uniqueId(),
+          url: "/teleconsultor/support/ticket",
+        },
+        // {
+        //   name: "Live Chat",
+        //   icon: "solar:chat-outline",
+        //   id: uniqueId(),
+        //   url: "/user/support/live-chat",
+        // },
+      ],
+    },
   ],
 
 

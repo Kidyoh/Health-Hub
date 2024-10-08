@@ -137,7 +137,15 @@ export default function RegistrationStepper() {
   
       if (response.ok) {
         alert("Registration successful!");
-        router.push("/"); // Navigate to homepage
+  
+        // Check the role and navigate accordingly
+        if (role === "USER") {
+          router.push("/"); // Navigate to homepage if role is USER
+        } else if (role === "TELECONSULTER" || role === "HEALTHCARE_FACILITY") {
+
+          router.push("/auth/login");
+          window.location.reload();
+        }
       } else {
         setError(data.error || "Registration failed.");
         console.error("Registration error:", data.error); // Debugging
@@ -149,6 +157,7 @@ export default function RegistrationStepper() {
       setLoading(false);
     }
   };
+  
   
   
   return (

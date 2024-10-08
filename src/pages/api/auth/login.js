@@ -17,7 +17,7 @@ async function handler(req, res) {
         return res.status(401).json({ error: 'Invalid email or password.' });
       }
 
-      req.session.set('user', { id: user.id, email: user.email, role: user.role });
+      req.session.set('user', { id: user.id, email: user.email, role: user.role, status: user.status });
       await req.session.save();
       res.status(200).json({ success: true, user });
     } catch (error) {
