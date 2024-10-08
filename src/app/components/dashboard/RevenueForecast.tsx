@@ -1,70 +1,86 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
 import { Select } from "flowbite-react";
 import { ApexOptions } from "apexcharts";
+import axios from "axios";
 
 const Chart = dynamic(() => import("react-apexcharts"), { ssr: false });
 
 const RevenueForecast = () => {
   const [selectedPeriod, setSelectedPeriod] = useState<string>("This Week");
+  const [transactionData, setTransactionData] = useState<any[]>([]); // Transaction data array
 
-  const getChartData = (period: string) => {
+  // Fetch transaction data from the backend
+  useEffect(() => {
+    const fetchTransactionData = async () => {
+      try {
+        const response = await axios.get("/api/admin/dashboard/transactions"); // Adjust your API endpoint
+        // Check if response is valid and is an array
+        if (Array.isArray(response.data.transactions)) {
+          setTransactionData(response.data.transactions);
+        } else {
+          console.error("Invalid transaction data format", response.data);
+        }
+      } catch (error) {
+        console.error("Error fetching transaction data:", error);
+      }
+    };
+
+    fetchTransactionData();
+  }, []);
+
+  // Helper function to get the date range for filtering
+  const getPeriodDateRange = (period: string) => {
+    const today = new Date();
     switch (period) {
       case "April 2024":
-        return {
-          series: [
-            {
-              name: "2024",
-              data: [2.5, 3.0, 2.8, 3.2, 2.9, 3.1, 2.7, 2.8, 3.0],
-            },
-            {
-              name: "2023",
-              data: [-1.5, -1.2, -1.8, -2.0, -1.7, -1.9, -2.1, -1.6, -1.8],
-            },
-          ],
-        };
+        return { startDate: new Date("2024-04-01T00:00:00"), endDate: new Date("2024-04-30T23:59:59") };
       case "May 2024":
-        return {
-          series: [
-            {
-              name: "2024",
-              data: [2.7, 2.9, 2.6, 3.1, 3.0, 2.8, 2.9, 3.2, 3.1],
-            },
-            {
-              name: "2023",
-              data: [-1.4, -1.3, -1.9, -1.7, -1.8, -2.0, -1.9, -1.8, -2.1],
-            },
-          ],
-        };
+        return { startDate: new Date("2024-05-01T00:00:00"), endDate: new Date("2024-05-31T23:59:59") };
       case "June 2024":
-        return {
-          series: [
-            {
-              name: "2024",
-              data: [3.0, 3.2, 3.1, 3.5, 3.4, 3.3, 3.2, 3.4, 3.6],
-            },
-            {
-              name: "2023",
-              data: [-1.6, -1.7, -1.8, -2.0, -1.9, -1.8, -1.7, -1.9, -2.0],
-            },
-          ],
-        };
+        return { startDate: new Date("2024-06-01T00:00:00"), endDate: new Date("2024-06-30T23:59:59") };
       case "This Week":
       default:
-        return {
-          series: [
-            {
-              name: "2024",
-              data: [1.2, 2.7, 1.0, 3.6, 2.1, 2.7, 2.2, 1.3, 2.5],
-            },
-            {
-              name: "2023",
-              data: [-2.8, -1.1, -2.5, -1.5, -2.3, -1.9, -1.0, -2.1, -1.3],
-            },
-          ],
-        };
+        const startOfWeek = new Date(today.setDate(today.getDate() - today.getDay())); // Start of this week
+        startOfWeek.setHours(0, 0, 0, 0); // Reset to the start of the day
+        return { startDate: startOfWeek, endDate: new Date() };
     }
+  };
+  
+  // Helper function to format transaction data for chart (grouped by hour)
+  const getChartData = (period: string) => {
+    const { startDate, endDate } = getPeriodDateRange(period);
+
+    // Filter transaction data by date range
+    const filteredData = transactionData.filter((transaction) => {
+      const transactionDate = new Date(transaction.createdAt);
+      return transactionDate >= startDate && transactionDate <= endDate;
+    });
+
+    // Group by hour and calculate total amount for each hour
+    const groupedData = filteredData.reduce((acc, transaction) => {
+      const transactionDate = new Date(transaction.createdAt);
+      const hourKey = transactionDate.toLocaleString("en-US", {
+        hour: "2-digit",
+        hour12: false, // 24-hour format
+      });
+      acc[hourKey] = (acc[hourKey] || 0) + transaction.amount;
+      return acc;
+    }, {});
+
+    const categories = Object.keys(groupedData); // Hours of the day
+    const dataSeries = Object.values(groupedData) as number[];
+
+    return {
+      series: [
+        {
+          name: "Revenue",
+          data: dataSeries, // Total amounts grouped by hour
+        },
+      ],
+      categories,
+    };
   };
 
   const optionsBarChart: ApexOptions = {
@@ -79,7 +95,7 @@ const RevenueForecast = () => {
         show: false,
       },
     },
-    colors: ["var(--color-primary)", "var(--color-error)"],
+    colors: ["var(--color-primary)"],
     dataLabels: {
       enabled: false,
     },
@@ -88,13 +104,13 @@ const RevenueForecast = () => {
       borderColor: "#90A4AE50",
       xaxis: {
         lines: {
-          show: true
-        }
+          show: true,
+        },
       },
       yaxis: {
         lines: {
-          show: true
-        }
+          show: true,
+        },
       },
     },
     stroke: {
@@ -112,7 +128,7 @@ const RevenueForecast = () => {
       },
     },
     xaxis: {
-      categories: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep"],
+      categories: [], // Dynamic categories (hours)
       axisBorder: {
         show: false,
       },
@@ -121,9 +137,9 @@ const RevenueForecast = () => {
       },
     },
     yaxis: {
-      min: -4,
-      max: 4,
-      tickAmount: 4,
+      min: 0,
+      max: Math.max(...getChartData(selectedPeriod).series[0].data, 0) + 10, // Adjust max dynamically
+      tickAmount: 5,
     },
     legend: {
       show: false,
@@ -142,7 +158,7 @@ const RevenueForecast = () => {
   return (
     <div className="rounded-xl dark:shadow-dark-md shadow-md bg-white dark:bg-darkgray p-6 relative w-full break-words">
       <div className="flex justify-between items-center">
-        <h5 className="card-title">Revenue Forecast</h5>
+        <h5 className="card-title">Revenue Forecast (Hourly)</h5>
         <Select
           id="periods"
           className="select-md"
@@ -159,7 +175,13 @@ const RevenueForecast = () => {
 
       <div className="-ms-4 -me-3 mt-2">
         <Chart
-          options={optionsBarChart}
+          options={{
+            ...optionsBarChart,
+            xaxis: {
+              ...optionsBarChart.xaxis,
+              categories: barChartData.categories,
+            },
+          }}
           series={barChartData.series}
           type="bar"
           height="315px"

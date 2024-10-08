@@ -56,6 +56,12 @@ const SidebarContent = {
           id: uniqueId(),
           url: "/user/teleconsultations",
         },
+        // {
+        //   name: "Health Care Facilities",
+        //   icon: "solar:hospital-outline",
+        //   id: uniqueId(),
+        //   url: "/user/facilities/appointments/book",
+        // },
         {
           name: "Health Tips",
           icon: "solar:health-outline",

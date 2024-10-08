@@ -1,10 +1,32 @@
-
 import { Button, Dropdown } from "flowbite-react";
 import React from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Icon } from "@iconify/react";
+import { useRouter } from "next/navigation";
+
 const Profile = () => {
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    try {
+      const res = await fetch('/api/auth/logout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (res.ok) {
+        router.push('/auth/login');
+      } else {
+        console.error('Failed to logout');
+      }
+    } catch (error) {
+      console.error('An error occurred during logout:', error);
+    }
+  };
+
   return (
     <div className="relative group/menu">
       <Dropdown
@@ -23,7 +45,6 @@ const Profile = () => {
           </span>
         )}
       >
-
         <Dropdown.Item
           as={Link}
           href="#"
@@ -33,7 +54,13 @@ const Profile = () => {
           My Profile
         </Dropdown.Item>
         <div className="p-3 pt-0">
-        <Button as={Link}  size={'sm'}  href="/auth/login" className="mt-2 border border-primary text-primary bg-transparent hover:bg-lightprimary outline-none focus:outline-none">Logout</Button>
+          <Button
+            size="sm"
+            className="mt-2 border border-primary text-primary bg-transparent hover:bg-lightprimary outline-none focus:outline-none"
+            onClick={handleLogout}
+          >
+            Logout
+          </Button>
         </div>
       </Dropdown>
     </div>

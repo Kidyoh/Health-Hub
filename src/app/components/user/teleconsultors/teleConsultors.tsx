@@ -86,7 +86,7 @@ const TeleconsultorsList = () => {
                 <Skeleton height={20} width={100} className="mt-2" /> {/* Skeleton for the rate */}
                 <Skeleton height={20} width={100} className="mt-2" /> {/* Skeleton for the rating */}
                 <Skeleton height={40} width={100} className="mt-4" /> {/* Skeleton for the button */}
-              </div>
+                </div>
             ))
         ) : (
           teleconsultors.map((teleconsultor) => (
@@ -100,7 +100,11 @@ const TeleconsultorsList = () => {
                   <p>Rate: ${teleconsultor.Teleconsultor[0].rate}</p>
                   <div className="flex items-center">
                     {renderStars(teleconsultor.Teleconsultor[0].rating)}
-                    <span className="ml-2">{teleconsultor.Teleconsultor[0].rating.toFixed(1)}</span>
+                    <span className="ml-2">
+                      {teleconsultor.Teleconsultor[0].rating !== null && teleconsultor.Teleconsultor[0].rating !== undefined
+                        ? teleconsultor.Teleconsultor[0].rating.toFixed(1)
+                        : "N/A"}
+                    </span>
                   </div>
                   <button
                     className="mt-4 bg-blue-600 text-white py-2 px-4 rounded"
