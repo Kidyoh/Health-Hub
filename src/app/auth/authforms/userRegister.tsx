@@ -65,6 +65,12 @@ export default function RegistrationStepper() {
     type: "",
   });
 
+  // Regular expressions for validation
+  const nameRegex = /^[A-Za-z]+$/;
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const phoneRegex = /^\d{10}$/; // Example for 10-digit phone number
+  const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$/;
+
   // Handle changes in User data inputs
   const handleUserChange = (e: ChangeEvent<HTMLInputElement>) => {
     setUserData({ ...userData, [e.target.name]: e.target.value });
@@ -96,6 +102,59 @@ export default function RegistrationStepper() {
     setStep(step - 1);
   };
 
+  // Validate the form based on the role and inputs
+  const validateForm = (): boolean => {
+    if (!nameRegex.test(userData.firstName)) {
+      setError("First name must only contain letters.");
+      return false;
+    }
+    if (!nameRegex.test(userData.lastName)) {
+      setError("Last name must only contain letters.");
+      return false;
+    }
+    if (!emailRegex.test(userData.email)) {
+      setError("Invalid email format.");
+      return false;
+    }
+    if (!passwordRegex.test(userData.password)) {
+      setError(
+        "Password must be at least 8 characters long, contain at least one uppercase letter, one lowercase letter, and one number."
+      );
+      return false;
+    }
+    if (!phoneRegex.test(userData.phone)) {
+      setError("Phone number must be a valid 10-digit number.");
+      return false;
+    }
+
+    // Additional validations for Teleconsultor role
+    if (role === "TELECONSULTER") {
+      if (isNaN(Number(teleconsultorData.rate))) {
+        setError("Rate must be a number.");
+        return false;
+      }
+      if (!teleconsultorData.specialties) {
+        setError("Please provide your specialties.");
+        return false;
+      }
+    }
+
+    // Additional validations for Healthcare Facility role
+    if (role === "HEALTHCARE_FACILITY") {
+      if (!facilityData.name) {
+        setError("Facility name is required.");
+        return false;
+      }
+      if (!facilityData.contact || !phoneRegex.test(facilityData.contact)) {
+        setError("Invalid facility contact number.");
+        return false;
+      }
+      // Add any further validation as needed for facilities
+    }
+
+    return true;
+  };
+
   const handleSubmit = async (e?: FormEvent) => {
     if (e) e.preventDefault();
     setLoading(true);
@@ -104,6 +163,12 @@ export default function RegistrationStepper() {
     // Validate role
     if (!["USER", "TELECONSULTER", "HEALTHCARE_FACILITY"].includes(role)) {
       setError("Invalid role selected.");
+      setLoading(false);
+      return;
+    }
+
+    // Validate the form data before submitting
+    if (!validateForm()) {
       setLoading(false);
       return;
     }
